@@ -1,0 +1,1347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AeroQuant | Algorithmic Stock Intelligence & Portfolio Terminal</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              400: '#FFB347',
+              500: '#FF9900',
+              600: '#E68A00',
+            },
+            darkbase: '#0B0E11',
+            panel: '#15191E',
+            subpanel: '#1E252E',
+            borderline: '#2A313A',
+            bamber: '#FF9900',
+            bgreen: '#00E676',
+            bred: '#FF1744',
+            bcyan: '#00E5FF'
+          },
+          animation: {
+            'glow-pulse': 'glowPulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+          },
+          keyframes: {
+            glowPulse: {
+              '0%, 100%': { opacity: 1 },
+              '50%': { opacity: 0.5 },
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      background-color: #0B0E11;
+      color: #F1F5F9;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'JetBrains Mono', 'Fira Code', monospace;
+    }
+    .glass-panel {
+      background: #15191E;
+      border: 1px solid #2A313A;
+      border-radius: 0.375rem;
+    }
+    .glow-emerald {
+      box-shadow: 0 0 25px -4px rgba(0, 230, 118, 0.35);
+    }
+    .glow-rose {
+      box-shadow: 0 0 25px -4px rgba(255, 23, 68, 0.35);
+    }
+    .glow-amber {
+      box-shadow: 0 0 25px -4px rgba(255, 153, 0, 0.35);
+    }
+    .glow-sky {
+      box-shadow: 0 0 25px -4px rgba(0, 229, 255, 0.3);
+    }
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 5px;
+      height: 5px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #0B0E11;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #2A313A;
+      border-radius: 2px;
+    }
+    @keyframes marquee {
+      0% { transform: translateX(0%); }
+      100% { transform: translateX(-50%); }
+    }
+    .animate-marquee {
+      display: flex;
+      width: max-content;
+      animation: marquee 65s linear infinite;
+    }
+    .animate-marquee:hover {
+      animation-play-state: paused;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col antialiased">
+
+  <!-- Top Navigation Bar -->
+  <header class="border-b border-[#2A313A] bg-[#0B0E11] sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between">
+      
+      <!-- Brand Logo -->
+      <div class="flex items-center space-x-3">
+        <div class="w-8 h-8 rounded bg-[#FF9900] text-black font-black text-xs flex items-center justify-center shadow-md shadow-amber-500/20">
+          <i class="fa-solid fa-chart-line text-sm"></i>
+        </div>
+        <div>
+          <div class="flex items-center space-x-2">
+            <span class="font-black text-base text-white tracking-wider font-mono">AERO<span class="text-[#FF9900]">QUANT</span></span>
+            <span class="text-[9px] px-1.5 py-0.5 rounded bg-[#FF9900]/15 text-[#FF9900] border border-[#FF9900]/30 font-mono font-bold tracking-wider">TERMINAL • LIVE</span>
+          </div>
+          <p class="text-[10px] text-slate-400 font-mono">Algorithmic Stock Intelligence & Risk Engine</p>
+        </div>
+      </div>
+
+      <!-- Navigation Tabs -->
+      <nav class="flex space-x-1 sm:space-x-1.5">
+        <button onclick="switchTab('screener')" id="nav-screener" class="tab-btn px-3.5 py-1.5 rounded text-xs font-black uppercase tracking-wider text-black bg-[#FF9900] shadow-sm transition-all flex items-center space-x-1.5 cursor-pointer">
+          <i class="fa-solid fa-crosshairs text-[11px]"></i> <span>Screener</span>
+        </button>
+        <button onclick="switchTab('portfolio')" id="nav-portfolio" class="tab-btn px-3.5 py-1.5 rounded text-xs font-bold uppercase tracking-wider text-slate-400 hover:text-white hover:bg-[#15191E] transition-all flex items-center space-x-1.5 cursor-pointer">
+          <i class="fa-solid fa-pie-chart text-[11px]"></i> <span>Portfolio</span>
+        </button>
+        <button onclick="switchTab('watchlist')" id="nav-watchlist" class="tab-btn px-3.5 py-1.5 rounded text-xs font-bold uppercase tracking-wider text-slate-400 hover:text-white hover:bg-[#15191E] transition-all flex items-center space-x-1.5 cursor-pointer">
+          <i class="fa-solid fa-list-check text-[11px]"></i> <span>Watchlist</span>
+        </button>
+        <button onclick="switchTab('backtest')" id="nav-backtest" class="tab-btn px-3.5 py-1.5 rounded text-xs font-bold uppercase tracking-wider text-slate-400 hover:text-white hover:bg-[#15191E] transition-all flex items-center space-x-1.5 cursor-pointer">
+          <i class="fa-solid fa-clock-rotate-left text-[11px]"></i> <span>Backtester</span>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Live Animated Ticker Tape Bar -->
+  <div class="bg-[#0B0E11] border-b border-[#2A313A] overflow-hidden select-none py-1.5 relative z-30 shadow-inner">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center">
+      <div class="pr-3 shrink-0 bg-[#0B0E11] z-10 border-r border-[#2A313A] flex items-center space-x-2 text-[10px] font-mono">
+        <span class="relative flex h-2 w-2">
+          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#FF9900] opacity-75"></span>
+          <span class="relative inline-flex rounded-full h-2 w-2 bg-[#FF9900]"></span>
+        </span>
+        <span class="font-bold text-[#FF9900] tracking-widest uppercase">• MARKET TAPE</span>
+      </div>
+      <div class="overflow-hidden whitespace-nowrap flex-1 ml-3">
+        <div id="tickerTapeTrack" class="animate-marquee flex items-center space-x-6 text-xs font-mono">
+          <span class="text-slate-500 text-xs font-mono"><i class="fa-solid fa-spinner fa-spin mr-1.5 text-[#FF9900]"></i> Initializing Bloomberg live market feed...</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Container -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-5 space-y-5">
+
+    <!-- ============================================================= -->
+    <!-- TAB 1: STOCK SCREENER -->
+    <!-- ============================================================= -->
+    <section id="tab-screener" class="tab-content space-y-5">
+      
+      <!-- Top Search Bar & Presets -->
+      <div class="glass-panel p-4 flex flex-wrap items-center justify-between gap-3 relative z-40">
+        <div class="flex flex-wrap items-center gap-3 w-full lg:w-auto">
+          
+          <!-- Live Autocomplete Search Input -->
+          <div class="relative w-full sm:w-80">
+            <label class="block text-[10px] uppercase font-mono font-bold text-slate-400 mb-1">
+              <i class="fa-solid fa-magnifying-glass text-[#FF9900] mr-1"></i> Search Equities (Name or Ticker)
+            </label>
+            <div class="relative">
+              <input 
+                type="text" 
+                id="stockSearchInput" 
+                placeholder="Search symbol e.g., hdfc, reliance, nvda, aapl..." 
+                oninput="onSearchInput(this.value)" 
+                onfocus="onSearchInput(this.value)" 
+                onkeydown="if(event.key === 'Enter') { onSearchEnter(); }"
+                class="w-full bg-[#0B0E11] border border-[#2A313A] rounded pl-3.5 pr-8 py-2 text-xs font-mono font-semibold text-white placeholder-slate-500 focus:outline-none focus:border-[#FF9900] shadow-inner"
+                autocomplete="off"
+              />
+              <span id="searchClearBtn" onclick="clearSearch()" class="hidden absolute right-3 top-2 text-slate-400 hover:text-white cursor-pointer text-xs">
+                <i class="fa-solid fa-xmark"></i>
+              </span>
+            </div>
+
+            <!-- Autocomplete Results Floating Dropdown -->
+            <div id="searchResultsDropdown" class="hidden absolute left-0 right-0 top-full mt-1.5 bg-[#15191E] border border-[#2A313A] rounded shadow-2xl overflow-hidden z-50 max-h-72 overflow-y-auto divide-y divide-[#2A313A]">
+            </div>
+          </div>
+
+          <!-- Active Ticker Code Input -->
+          <div class="w-28">
+            <label class="block text-[10px] uppercase font-mono font-bold text-slate-400 mb-1">Ticker</label>
+            <input type="text" id="tickerInput" value="AAPL" onkeydown="if(event.key === 'Enter') { analyzeStock(this.value.trim().toUpperCase()); }" class="w-full bg-[#0B0E11] border border-[#2A313A] rounded px-3 py-2 text-xs font-mono font-bold text-white uppercase focus:outline-none focus:border-[#FF9900] tracking-wider text-center" />
+          </div>
+          
+          <!-- Risk Profile Selector -->
+          <div class="w-44">
+            <label class="block text-[10px] uppercase font-mono font-bold text-slate-400 mb-1">Risk Profile</label>
+            <select id="riskTolerance" class="w-full bg-[#0B0E11] border border-[#2A313A] rounded px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-[#FF9900]">
+              <option value="Conservative">Conservative (2.5% Stop)</option>
+              <option value="Moderate" selected>Moderate (4.0% Stop)</option>
+              <option value="Aggressive">Aggressive (6.0% Stop)</option>
+            </select>
+          </div>
+
+          <!-- Analyze Button -->
+          <div class="pt-4">
+            <button onclick="analyzeStock()" id="btnAnalyze" class="px-5 py-2 rounded bg-[#FF9900] hover:bg-[#E68A00] text-black font-black text-xs uppercase tracking-wider shadow-md shadow-amber-500/20 transition flex items-center space-x-1.5 cursor-pointer">
+              <i class="fa-solid fa-bolt text-xs"></i> <span>Analyze &lt;GO&gt;</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Quick Ticker Chips -->
+        <div class="flex items-center space-x-1.5 overflow-x-auto text-xs pt-2 lg:pt-0">
+          <span class="text-slate-400 font-mono text-[10px] mr-1 uppercase">QUICK:</span>
+          <button onclick="selectStock('HDFCBANK.NS', 'HDFC Bank Ltd.')" class="chip px-2.5 py-1 rounded bg-[#0B0E11] hover:bg-[#1E252E] text-slate-300 font-mono text-[11px] border border-[#2A313A] hover:border-[#FF9900] transition">HDFCBANK</button>
+          <button onclick="selectStock('RELIANCE.NS', 'Reliance Industries Ltd.')" class="chip px-2.5 py-1 rounded bg-[#0B0E11] hover:bg-[#1E252E] text-slate-300 font-mono text-[11px] border border-[#2A313A] hover:border-[#FF9900] transition">RELIANCE</button>
+          <button onclick="selectStock('TATAMOTORS.NS', 'Tata Motors Ltd.')" class="chip px-2.5 py-1 rounded bg-[#0B0E11] hover:bg-[#1E252E] text-slate-300 font-mono text-[11px] border border-[#2A313A] hover:border-[#FF9900] transition">TATAMOTORS</button>
+          <button onclick="selectStock('NVDA', 'NVIDIA Corporation')" class="chip px-2.5 py-1 rounded bg-[#0B0E11] hover:bg-[#1E252E] text-slate-300 font-mono text-[11px] border border-[#2A313A] hover:border-[#FF9900] transition">NVDA</button>
+        </div>
+      </div>
+
+      <!-- Main Overview Grid -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+        
+        <!-- Left: Price Chart & Technicals (8 Cols) -->
+        <div class="lg:col-span-8 space-y-5">
+          <div class="glass-panel p-5 space-y-4">
+            
+            <!-- Price Header -->
+            <div class="flex flex-wrap items-center justify-between gap-4 border-b border-[#2A313A] pb-3">
+              <div>
+                <div class="flex items-center space-x-3">
+                  <h1 id="dispTicker" class="text-3xl font-black text-white tracking-tight font-mono">AAPL</h1>
+                  <span id="dispPrice" class="text-3xl font-extrabold text-white font-mono">$0.00</span>
+                  <span id="dispChange" class="px-2 py-0.5 rounded text-xs font-bold font-mono bg-emerald-500/15 text-[#00E676] border border-[#00E676]/30">+0.00%</span>
+                </div>
+                <span id="dispCompanyName" class="text-xs font-bold font-mono text-[#FF9900] mt-1 block">Apple Inc. &bull; Consumer Tech (NASDAQ)</span>
+                <p id="dispSummaryMsg" class="text-xs text-slate-400 font-mono mt-0.5">Analyzing technical indicators and Random Forest signals...</p>
+              </div>
+
+              <!-- Technical Indicator Badges -->
+              <div class="flex items-center space-x-2 text-xs">
+                <div class="bg-[#0B0E11] px-3 py-1.5 rounded border border-[#2A313A] text-center">
+                  <span class="text-[9px] text-slate-400 block uppercase font-mono font-bold">RSI (14)</span>
+                  <span id="dispRsi" class="font-bold text-[#FF9900] font-mono text-sm">--</span>
+                </div>
+                <div class="bg-[#0B0E11] px-3 py-1.5 rounded border border-[#2A313A] text-center">
+                  <span class="text-[9px] text-slate-400 block uppercase font-mono font-bold">50 SMA</span>
+                  <span id="dispSma50" class="font-bold text-[#00E5FF] font-mono text-sm">--</span>
+                </div>
+                <div class="bg-[#0B0E11] px-3 py-1.5 rounded border border-[#2A313A] text-center">
+                  <span class="text-[9px] text-slate-400 block uppercase font-mono font-bold">Volatility</span>
+                  <span id="dispVol" class="font-bold text-[#00E676] font-mono text-sm">--</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Interactive Timeframe & Chart Indicator Controls -->
+            <div class="flex items-center justify-between pt-0 pb-0 text-xs border-b border-[#2A313A]/50 pb-2">
+              <div class="flex items-center space-x-2 text-slate-400 font-mono">
+                <span class="w-2 h-2 rounded-full bg-[#FF9900]"></span>
+                <span class="font-bold text-[10px] text-white uppercase tracking-wider">Dynamic History & Moving Averages</span>
+              </div>
+              <div class="flex items-center space-x-1 bg-[#0B0E11] p-1 rounded border border-[#2A313A]">
+                <button onclick="setTimeframe('1M')" id="tf-1M" class="tf-btn px-2.5 py-0.5 rounded text-[10px] font-mono font-bold text-slate-400 hover:text-white transition cursor-pointer">1M</button>
+                <button onclick="setTimeframe('3M')" id="tf-3M" class="tf-btn px-2.5 py-0.5 rounded text-[10px] font-mono font-bold text-slate-400 hover:text-white transition cursor-pointer">3M</button>
+                <button onclick="setTimeframe('6M')" id="tf-6M" class="tf-btn px-2.5 py-0.5 rounded text-[10px] font-mono font-bold text-slate-400 hover:text-white transition cursor-pointer">6M</button>
+                <button onclick="setTimeframe('1Y')" id="tf-1Y" class="tf-btn px-2.5 py-0.5 rounded text-[10px] font-mono font-bold bg-[#FF9900] text-black shadow-sm transition cursor-pointer">1Y</button>
+              </div>
+            </div>
+
+            <!-- Price Chart Canvas -->
+            <div class="h-80 w-full relative">
+              <canvas id="priceChartCanvas"></canvas>
+            </div>
+
+          </div>
+
+          <!-- 1-PAGE PRINTABLE INVESTMENT SUMMARY MEMO -->
+          <div class="glass-panel p-5 space-y-3">
+            <div class="flex items-center justify-between border-b border-[#2A313A] pb-3">
+              <div class="flex items-center space-x-2">
+                <i class="fa-solid fa-file-lines text-[#FF9900] text-sm"></i>
+                <h3 class="text-xs font-bold text-white uppercase font-mono tracking-wider">BLOOMBERG INTELLIGENCE &bull; 1-PAGE INVESTMENT MEMO</h3>
+              </div>
+              <div class="flex space-x-2">
+                <button onclick="copyMemo()" class="text-xs px-3 py-1.5 rounded bg-[#0B0E11] hover:bg-[#1E252E] text-slate-300 border border-[#2A313A] font-mono transition flex items-center space-x-1 cursor-pointer">
+                  <i class="fa-regular fa-copy"></i> <span>Copy</span>
+                </button>
+                <button onclick="printMemo()" class="text-xs px-3 py-1.5 rounded bg-[#FF9900] hover:bg-[#E68A00] text-black font-bold font-mono shadow transition flex items-center space-x-1 cursor-pointer">
+                  <i class="fa-solid fa-print"></i> <span>Print / PDF &lt;GO&gt;</span>
+                </button>
+              </div>
+            </div>
+
+            <pre id="memoContent" class="bg-[#0B0E11] p-4 rounded border border-[#2A313A] text-xs text-slate-200 font-mono leading-relaxed overflow-x-auto whitespace-pre-wrap max-h-72">
+Enter a stock ticker and click Analyze to generate the formal Investment Memo.
+            </pre>
+          </div>
+
+        </div>
+
+        <!-- Right: Action Signal & Risk Levels Card (4 Cols) -->
+        <div class="lg:col-span-4 space-y-5">
+          
+          <!-- Recommendation Signal Card -->
+          <div id="signalCard" class="glass-panel p-5 text-center space-y-4 glow-amber">
+            <span class="text-[10px] font-bold font-mono text-slate-400 uppercase tracking-widest block">• AI MODEL RECOMMENDATION &bull;</span>
+            
+            <div class="py-1">
+              <div id="signalBadge" class="inline-flex items-center space-x-2 px-5 py-2 rounded text-xl font-black font-mono tracking-wider bg-emerald-500/15 text-[#00E676] border border-[#00E676]/40">
+                <i class="fa-solid fa-arrow-trend-up"></i>
+                <span>BUY</span>
+              </div>
+              <p id="dispSignalTone" class="text-xs font-mono text-slate-300 font-medium mt-2">Bullish Momentum Detected</p>
+            </div>
+
+            <!-- Model Probability Meter -->
+            <div class="bg-[#0B0E11] p-3.5 rounded border border-[#2A313A] space-y-2 text-left font-mono">
+              <div class="flex justify-between text-xs font-semibold">
+                <span class="text-slate-400 text-[11px] uppercase">Model Conviction</span>
+                <span id="dispConfidence" class="text-white font-bold">0%</span>
+              </div>
+              <div class="w-full bg-[#1E252E] h-2 rounded overflow-hidden">
+                <div id="confidenceBar" class="bg-[#00E676] h-full w-0 transition-all duration-700"></div>
+              </div>
+              <p class="text-[10px] text-slate-400 font-mono">Ensemble probability via 100-Tree Random Forest.</p>
+            </div>
+
+            <!-- Risk Management Price Levels -->
+            <div class="space-y-2.5 pt-1 text-left font-mono">
+              <span class="text-[10px] font-bold text-slate-300 uppercase tracking-wider block">Risk Management Geometry</span>
+              
+              <!-- Stop Loss Box -->
+              <div class="bg-[#FF1744]/10 border border-[#FF1744]/30 p-3 rounded flex items-center justify-between">
+                <div>
+                  <span class="text-[10px] font-bold text-[#FF1744] uppercase flex items-center">
+                    <i class="fa-solid fa-shield-halved mr-1.5"></i> Stop-Loss Exit
+                  </span>
+                  <span class="text-[9px] text-slate-400">Strict Capital Preservation</span>
+                </div>
+                <div class="text-right">
+                  <span id="dispStopLoss" class="text-base font-black text-white font-mono">$0.00</span>
+                  <span id="dispRiskAmt" class="text-[10px] text-[#FF1744] block font-mono">-$0.00</span>
+                </div>
+              </div>
+
+              <!-- Target Price Box -->
+              <div class="bg-emerald-500/10 border border-[#00E676]/30 p-3 rounded flex items-center justify-between">
+                <div>
+                  <span class="text-[10px] font-bold text-[#00E676] uppercase flex items-center">
+                    <i class="fa-solid fa-bullseye mr-1.5"></i> Target Take-Profit
+                  </span>
+                  <span class="text-[9px] text-slate-400">1:2 Risk-Reward Ratio</span>
+                </div>
+                <div class="text-right">
+                  <span id="dispTargetPrice" class="text-base font-black text-white font-mono">$0.00</span>
+                  <span id="dispRewardAmt" class="text-[10px] text-[#00E676] block font-mono">+$0.00</span>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Technical Indicator Health Scorecard & Breakdown Radar -->
+          <div class="glass-panel p-4 space-y-3">
+            <div class="flex items-center justify-between border-b border-[#2A313A] pb-2">
+              <div class="flex items-center space-x-2">
+                <i class="fa-solid fa-gauge-high text-[#FF9900] text-xs"></i>
+                <h3 class="text-xs font-bold text-white uppercase font-mono tracking-wider">TECHNICAL SCORECARD</h3>
+              </div>
+              <span class="text-[9px] px-1.5 py-0.5 rounded bg-[#0B0E11] text-[#FF9900] border border-[#2A313A] font-mono">MULTI-FACTOR</span>
+            </div>
+
+            <div class="space-y-2.5 text-xs font-mono">
+              
+              <!-- Factor 1: RSI (14) Momentum -->
+              <div class="bg-[#0B0E11] p-2.5 rounded border border-[#2A313A] space-y-1.5">
+                <div class="flex items-center justify-between">
+                  <span class="text-slate-400 font-medium text-[10px] flex items-center uppercase">
+                    <span class="w-1.5 h-1.5 rounded-full bg-[#FF9900] mr-1.5"></span> RSI (14) Momentum
+                  </span>
+                  <span id="scorecardRsiBadge" class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-emerald-500/10 text-[#00E676] border border-[#00E676]/20">Bullish</span>
+                </div>
+                <div class="w-full bg-[#1E252E] h-1.5 rounded overflow-hidden relative">
+                  <div id="scorecardRsiTrack" class="bg-[#FF9900] h-full rounded transition-all duration-500" style="width: 50%;"></div>
+                </div>
+                <div class="flex justify-between text-[9px] text-slate-500 font-mono">
+                  <span>30 Oversold</span>
+                  <span id="scorecardRsiVal" class="text-white font-bold">50.0</span>
+                  <span>70 Overbought</span>
+                </div>
+              </div>
+
+              <!-- Factor 2: MACD Trend Direction -->
+              <div class="bg-[#0B0E11] p-2.5 rounded border border-[#2A313A] space-y-1">
+                <div class="flex items-center justify-between">
+                  <span class="text-slate-400 font-medium text-[10px] flex items-center uppercase">
+                    <span class="w-1.5 h-1.5 rounded-full bg-[#00E676] mr-1.5"></span> MACD Trend Signal
+                  </span>
+                  <span id="scorecardMacdBadge" class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-emerald-500/10 text-[#00E676] border border-[#00E676]/20">Crossover</span>
+                </div>
+                <p id="scorecardMacdMsg" class="text-[10px] text-slate-300 font-mono mt-0.5">MACD: +0.00 | Signal: +0.00</p>
+              </div>
+
+              <!-- Factor 3: Annualized Volatility -->
+              <div class="bg-[#0B0E11] p-2.5 rounded border border-[#2A313A] space-y-1.5">
+                <div class="flex items-center justify-between">
+                  <span class="text-slate-400 font-medium text-[10px] flex items-center uppercase">
+                    <span class="w-1.5 h-1.5 rounded-full bg-[#FF9900] mr-1.5"></span> Volatility Profile
+                  </span>
+                  <span id="scorecardVolBadge" class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-500/10 text-[#FF9900] border border-[#FF9900]/20">Moderate Risk</span>
+                </div>
+                <div class="w-full bg-[#1E252E] h-1.5 rounded overflow-hidden">
+                  <div id="scorecardVolTrack" class="bg-gradient-to-r from-[#00E676] via-[#FF9900] to-[#FF1744] h-full rounded transition-all duration-500" style="width: 25%;"></div>
+                </div>
+                <div class="flex justify-between text-[9px] text-slate-500 font-mono">
+                  <span>Defensive (&lt;20%)</span>
+                  <span id="scorecardVolVal" class="text-white font-bold">20.0%</span>
+                  <span>Turbulent (&gt;35%)</span>
+                </div>
+              </div>
+
+              <!-- Factor 4: Moving Average Alignment -->
+              <div class="bg-[#0B0E11] p-2.5 rounded border border-[#2A313A] flex items-center justify-between">
+                <div>
+                  <span class="text-[9px] font-medium text-slate-400 uppercase block">MA Alignment</span>
+                  <span id="scorecardMaMsg" class="text-xs font-bold font-mono text-white mt-0.5 block">Golden Alignment</span>
+                </div>
+                <div id="scorecardMaIcon" class="w-7 h-7 rounded bg-emerald-500/10 text-[#00E676] border border-[#00E676]/20 flex items-center justify-center text-xs">
+                  <i class="fa-solid fa-arrow-trend-up"></i>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ============================================================= -->
+    <!-- TAB 2: PORTFOLIO OPTIMIZER -->
+    <!-- ============================================================= -->
+    <section id="tab-portfolio" class="tab-content hidden space-y-5">
+      <div class="glass-panel p-5 space-y-5">
+        
+        <div class="flex flex-wrap items-center justify-between gap-4 border-b border-[#2A313A] pb-3">
+          <div>
+            <h2 class="text-lg font-black text-white font-mono flex items-center">
+              <i class="fa-solid fa-chart-pie text-[#FF9900] mr-2"></i> PORTFOLIO RISK & ALLOCATION ENGINE &lt;PORT&gt;
+            </h2>
+            <p class="text-xs text-slate-400 font-mono">Modern Portfolio Theory: Sharpe Ratio Maximization via Covariance Matrix</p>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-2.5">
+            <div>
+              <label class="block text-[10px] uppercase font-mono font-bold text-slate-400 mb-1">Tickers</label>
+              <input type="text" id="portTickers" value="AAPL, MSFT, NVDA, AMZN" class="bg-[#0B0E11] border border-[#2A313A] rounded px-3 py-1.5 text-xs font-mono text-white focus:outline-none focus:border-[#FF9900] w-60 uppercase tracking-wide" />
+            </div>
+            <div>
+              <label class="block text-[10px] uppercase font-mono font-bold text-slate-400 mb-1">Capital ($)</label>
+              <input type="number" id="portCapital" value="10000" step="1000" min="500" class="bg-[#0B0E11] border border-[#2A313A] rounded px-3 py-1.5 text-xs font-mono text-white focus:outline-none focus:border-[#FF9900] w-24" />
+            </div>
+            <div class="pt-4 flex items-center space-x-1.5">
+              <button onclick="optimizePortfolio()" id="btnOptimize" class="px-4 py-1.5 rounded bg-[#FF9900] hover:bg-[#E68A00] text-black font-black uppercase tracking-wider text-xs shadow-sm transition flex items-center space-x-1 cursor-pointer">
+                <i class="fa-solid fa-sliders text-xs"></i> <span>Rebalance &lt;GO&gt;</span>
+              </button>
+              <button onclick="exportPortfolioCSV()" id="btnExportCSV" class="px-3 py-1.5 rounded bg-[#0B0E11] hover:bg-[#1E252E] text-slate-200 border border-[#2A313A] text-xs font-bold font-mono transition flex items-center space-x-1 cursor-pointer">
+                <i class="fa-solid fa-file-arrow-down text-[#00E676]"></i> <span>Export CSV</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Strategy 2: Beginner 1-Click Theme Baskets -->
+        <div class="bg-[#0B0E11] p-3 rounded border border-[#2A313A] flex flex-wrap items-center justify-between gap-2.5 text-xs font-mono">
+          <div class="flex items-center space-x-2 text-slate-300 font-bold">
+            <i class="fa-solid fa-layer-group text-[#FF9900]"></i>
+            <span class="text-[11px] uppercase tracking-wider">Theme Portfolios:</span>
+          </div>
+          <div class="flex flex-wrap gap-1.5">
+            <button onclick="loadBasket('ai')" class="px-2.5 py-1 rounded bg-[#15191E] hover:bg-[#1E252E] text-slate-200 border border-[#2A313A] hover:border-[#FF9900] transition flex items-center space-x-1 text-[11px] font-mono">
+              <span>🤖 Top AI & Tech</span>
+            </button>
+            <button onclick="loadBasket('india')" class="px-2.5 py-1 rounded bg-[#15191E] hover:bg-[#1E252E] text-slate-200 border border-[#2A313A] hover:border-[#FF9900] transition flex items-center space-x-1 text-[11px] font-mono">
+              <span>🇮🇳 India Bluechips</span>
+            </button>
+            <button onclick="loadBasket('mobility')" class="px-2.5 py-1 rounded bg-[#15191E] hover:bg-[#1E252E] text-slate-200 border border-[#2A313A] hover:border-[#FF9900] transition flex items-center space-x-1 text-[11px] font-mono">
+              <span>⚡ EV & Future Tech</span>
+            </button>
+            <button onclick="loadBasket('balanced')" class="px-2.5 py-1 rounded bg-[#15191E] hover:bg-[#1E252E] text-slate-200 border border-[#2A313A] hover:border-[#FF9900] transition flex items-center space-x-1 text-[11px] font-mono">
+              <span>🛡️ Low Vol Dividend</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Metrics Strip -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 font-mono">
+          <div class="bg-[#0B0E11] p-3.5 rounded border border-[#2A313A] text-center">
+            <span class="text-[10px] uppercase font-bold text-slate-400 block">Sharpe Ratio</span>
+            <span id="dispSharpe" class="text-2xl font-black text-[#FF9900] mt-1 block">--</span>
+          </div>
+          <div class="bg-[#0B0E11] p-3.5 rounded border border-[#2A313A] text-center">
+            <span class="text-[10px] uppercase font-bold text-slate-400 block">Exp. Annual Return</span>
+            <span id="dispExpReturn" class="text-2xl font-black text-[#00E676] mt-1 block">--</span>
+          </div>
+          <div class="bg-[#0B0E11] p-3.5 rounded border border-[#2A313A] text-center">
+            <span class="text-[10px] uppercase font-bold text-slate-400 block">Portfolio Volatility</span>
+            <span id="dispExpVol" class="text-2xl font-black text-[#00E5FF] mt-1 block">--</span>
+          </div>
+        </div>
+
+        <!-- Doughnut Chart & Table Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-center">
+          <div class="lg:col-span-5 flex items-center justify-center p-3">
+            <div class="relative w-60 h-60">
+              <canvas id="portPieCanvas"></canvas>
+            </div>
+          </div>
+
+          <div class="lg:col-span-7">
+            <div class="overflow-x-auto rounded border border-[#2A313A]">
+              <table class="w-full text-left text-xs text-slate-300 font-mono">
+                <thead class="bg-[#0B0E11] text-slate-400 uppercase font-mono border-b border-[#2A313A] text-[11px]">
+                  <tr>
+                    <th class="py-2.5 px-3.5">Asset Ticker</th>
+                    <th class="py-2.5 px-3.5">Optimal Weight</th>
+                    <th class="py-2.5 px-3.5">Capital Allocation ($)</th>
+                  </tr>
+                </thead>
+                <tbody id="portTableBody" class="divide-y divide-[#2A313A]/60 font-mono">
+                  <tr>
+                    <td colspan="3" class="py-6 text-center text-slate-500">Click Rebalance to calculate optimal weights.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ============================================================= -->
+    <!-- TAB 3: MARKET WATCHLIST -->
+    <!-- ============================================================= -->
+    <section id="tab-watchlist" class="tab-content hidden space-y-5">
+      <div class="glass-panel p-5 space-y-4">
+        <div class="flex items-center justify-between border-b border-[#2A313A] pb-3">
+          <div>
+            <h2 class="text-lg font-black text-white font-mono flex items-center">
+              <i class="fa-solid fa-list-check text-[#FF9900] mr-2"></i> MARKET WATCHLIST & SCANNERS &lt;SECT&gt;
+            </h2>
+            <p class="text-xs text-slate-400 font-mono">Real-time quotes, 24h performance, and Random Forest momentum classification</p>
+          </div>
+          <button onclick="loadWatchlist()" class="px-3 py-1.5 rounded bg-[#0B0E11] hover:bg-[#1E252E] text-xs text-slate-300 font-mono font-medium border border-[#2A313A] transition cursor-pointer">
+            <i class="fa-solid fa-rotate mr-1 text-[#FF9900]"></i> Refresh
+          </button>
+        </div>
+
+        <div class="overflow-x-auto rounded border border-[#2A313A]">
+          <table class="w-full text-left text-xs text-slate-300 font-mono">
+            <thead class="bg-[#0B0E11] text-slate-400 uppercase font-mono border-b border-[#2A313A] text-[10px] tracking-wider">
+              <tr>
+                <th class="py-2.5 px-3.5">Company / Asset</th>
+                <th class="py-2.5 px-3.5">Sector</th>
+                <th class="py-2.5 px-3.5">Last Price</th>
+                <th class="py-2.5 px-3.5">24h Change</th>
+                <th class="py-2.5 px-3.5">RSI (14)</th>
+                <th class="py-2.5 px-3.5">ML Trend</th>
+                <th class="py-2.5 px-3.5 text-right">Action</th>
+              </tr>
+            </thead>
+            <tbody id="watchlistTableBody" class="divide-y divide-[#2A313A]/60 font-mono">
+              <tr>
+                <td colspan="7" class="py-6 text-center text-slate-500">
+                  <i class="fa-solid fa-spinner fa-spin mr-2 text-[#FF9900]"></i> Loading market tickers...
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================= -->
+    <!-- TAB 4: BACKTEST STRATEGY SIMULATOR -->
+    <!-- ============================================================= -->
+    <section id="tab-backtest" class="tab-content hidden space-y-5">
+      <div class="glass-panel p-5 space-y-5">
+        
+        <div class="flex flex-wrap items-center justify-between gap-4 border-b border-[#2A313A] pb-3">
+          <div>
+            <h2 class="text-lg font-black text-white font-mono flex items-center">
+              <i class="fa-solid fa-clock-rotate-left text-[#FF9900] mr-2"></i> 1-YEAR QUANT STRATEGY BACKTESTER &lt;BT&gt;
+            </h2>
+            <p class="text-xs text-slate-400 font-mono">Historical simulation of Random Forest model signals vs. Buy & Hold benchmark</p>
+          </div>
+
+          <div class="flex items-center space-x-2.5">
+            <input type="text" id="backtestTicker" value="AAPL" class="bg-[#0B0E11] border border-[#2A313A] rounded px-3 py-1.5 text-xs font-mono text-white focus:outline-none focus:border-[#FF9900] w-24 uppercase" />
+            <input type="number" id="backtestCapital" value="1000" step="100" class="bg-[#0B0E11] border border-[#2A313A] rounded px-3 py-1.5 text-xs font-mono text-white focus:outline-none focus:border-[#FF9900] w-24" />
+            <button onclick="runBacktest()" id="btnBacktest" class="px-4 py-1.5 rounded bg-[#FF9900] hover:bg-[#E68A00] text-black font-black uppercase tracking-wider text-xs shadow-sm transition flex items-center space-x-1 cursor-pointer">
+              <i class="fa-solid fa-play text-xs"></i> <span>Run &lt;GO&gt;</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Backtest KPIs -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 font-mono">
+          <div class="bg-[#0B0E11] p-3 rounded border border-[#2A313A] text-center">
+            <span class="text-[10px] uppercase font-bold text-slate-400 block">ML Return</span>
+            <span id="btMlReturn" class="text-xl font-black text-[#00E676] mt-1 block">0.0%</span>
+          </div>
+          <div class="bg-[#0B0E11] p-3 rounded border border-[#2A313A] text-center">
+            <span class="text-[10px] uppercase font-bold text-slate-400 block">Buy & Hold</span>
+            <span id="btBhReturn" class="text-xl font-black text-slate-300 mt-1 block">0.0%</span>
+          </div>
+          <div class="bg-[#0B0E11] p-3 rounded border border-[#2A313A] text-center">
+            <span class="text-[10px] uppercase font-bold text-slate-400 block">Generated Alpha</span>
+            <span id="btAlpha" class="text-xl font-black text-[#FF9900] mt-1 block">+0.0%</span>
+          </div>
+          <div class="bg-[#0B0E11] p-3 rounded border border-[#2A313A] text-center">
+            <span class="text-[10px] uppercase font-bold text-slate-400 block">Win Rate</span>
+            <span id="btWinRate" class="text-xl font-black text-[#00E5FF] mt-1 block">0.0%</span>
+          </div>
+        </div>
+
+        <!-- Cumulative Equity Line Chart -->
+        <div class="bg-[#0B0E11] p-4 rounded border border-[#2A313A] space-y-3 font-mono">
+          <div class="flex justify-between items-center text-xs">
+            <span class="font-bold text-white uppercase text-[11px]">Cumulative Equity Curve ($)</span>
+            <div class="flex items-center space-x-4 text-[11px]">
+              <span class="text-[#00E676] flex items-center"><span class="w-2.5 h-2.5 bg-[#00E676] inline-block mr-1 rounded-none"></span> ML Strategy</span>
+              <span class="text-slate-400 flex items-center"><span class="w-2.5 h-2.5 bg-slate-500 inline-block mr-1 rounded-none"></span> Buy & Hold</span>
+            </div>
+          </div>
+          <div class="h-80 w-full relative">
+            <canvas id="backtestChartCanvas"></canvas>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="border-t border-[#2A313A] py-4 text-center text-[11px] text-slate-500 font-mono bg-[#0B0E11]">
+    AeroQuant Quantitative Terminal &bull; Market Analytics &amp; Portfolio Intelligence &bull; High-Frequency Execution Engine
+  </footer>
+
+  <!-- Interactive JavaScript -->
+  <script>
+    let priceChart = null;
+    let pieChart = null;
+    let backtestChart = null;
+    let rawChartData = null;
+    let activeTimeframe = '1Y';
+    let lastPortfolioData = null;
+
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('bg-[#FF9900]', 'text-black', 'font-black', 'shadow-sm');
+        btn.classList.add('text-slate-400', 'hover:text-white', 'hover:bg-[#15191E]');
+      });
+
+      document.getElementById('tab-' + tabId).classList.remove('hidden');
+      const activeBtn = document.getElementById('nav-' + tabId);
+      activeBtn.classList.remove('text-slate-400', 'hover:text-white', 'hover:bg-[#15191E]');
+      activeBtn.classList.add('bg-[#FF9900]', 'text-black', 'font-black', 'shadow-sm');
+
+      if (tabId === 'watchlist') loadWatchlist();
+      if (tabId === 'backtest' && !backtestChart) runBacktest();
+      if (tabId === 'portfolio' && !pieChart) optimizePortfolio();
+    }
+
+    // Extensive Stock Catalog for Fast Real-Time Autocomplete Search
+    const STOCK_CATALOG = [
+      // HDFC Group
+      { ticker: 'HDFCBANK.NS', name: 'HDFC Bank Ltd.', sector: 'Banking & Financial Services', exchange: 'NSE', aliases: ['hdfc', 'bank'] },
+      { ticker: 'HDFCLIFE.NS', name: 'HDFC Life Insurance Co.', sector: 'Life Insurance', exchange: 'NSE', aliases: ['hdfc', 'insurance'] },
+      { ticker: 'HDFCAMC.NS', name: 'HDFC Asset Management Co.', sector: 'Mutual Funds & AMC', exchange: 'NSE', aliases: ['hdfc', 'mutual fund'] },
+
+      // Reliance Group
+      { ticker: 'RELIANCE.NS', name: 'Reliance Industries Ltd.', sector: 'Energy, Retail & Jio 5G', exchange: 'NSE', aliases: ['reliance', 'jio', 'mukesh ambani'] },
+      { ticker: 'RPOWER.NS', name: 'Reliance Power Ltd.', sector: 'Power Generation & Utilities', exchange: 'NSE', aliases: ['reliance', 'power'] },
+      { ticker: 'RELINFRA.NS', name: 'Reliance Infrastructure Ltd.', sector: 'Engineering & Metro Infra', exchange: 'NSE', aliases: ['reliance', 'infra'] },
+
+      // Tata Group
+      { ticker: 'TCS.NS', name: 'Tata Consultancy Services', sector: 'IT Services & AI Solutions', exchange: 'NSE', aliases: ['tata', 'tcs', 'software'] },
+      { ticker: 'TATAMOTORS.NS', name: 'Tata Motors Ltd.', sector: 'Automotive & EVs', exchange: 'NSE', aliases: ['tata', 'motors', 'cars', 'ev'] },
+      { ticker: 'TATASTEEL.NS', name: 'Tata Steel Ltd.', sector: 'Metals & Mining', exchange: 'NSE', aliases: ['tata', 'steel'] },
+      { ticker: 'TATAPOWER.NS', name: 'Tata Power Company Ltd.', sector: 'Renewable & Solar Energy', exchange: 'NSE', aliases: ['tata', 'power', 'solar'] },
+      { ticker: 'TITAN.NS', name: 'Titan Company Ltd.', sector: 'Jewelry & Watches (Tata)', exchange: 'NSE', aliases: ['tata', 'titan', 'tanishq'] },
+
+      // Adani Group
+      { ticker: 'ADANIENT.NS', name: 'Adani Enterprises Ltd.', sector: 'Commodities & Airports', exchange: 'NSE', aliases: ['adani', 'enterprises'] },
+      { ticker: 'ADANIPORTS.NS', name: 'Adani Ports & SEZ', sector: 'Ports & Marine Logistics', exchange: 'NSE', aliases: ['adani', 'ports'] },
+      { ticker: 'ATGL.NS', name: 'Adani Total Gas Ltd.', sector: 'City Gas Distribution', exchange: 'NSE', aliases: ['adani', 'gas'] },
+
+      // Other Indian Bluechips
+      { ticker: 'SBIN.NS', name: 'State Bank of India (SBI)', sector: 'Public Sector Banking', exchange: 'NSE', aliases: ['sbi', 'state bank'] },
+      { ticker: 'ICICIBANK.NS', name: 'ICICI Bank Ltd.', sector: 'Private Banking', exchange: 'NSE', aliases: ['icici', 'bank'] },
+      { ticker: 'KOTAKBANK.NS', name: 'Kotak Mahindra Bank', sector: 'Private Banking', exchange: 'NSE', aliases: ['kotak', 'bank'] },
+      { ticker: 'AXISBANK.NS', name: 'Axis Bank Ltd.', sector: 'Private Banking', exchange: 'NSE', aliases: ['axis', 'bank'] },
+      { ticker: 'BAJFINANCE.NS', name: 'Bajaj Finance Ltd.', sector: 'Consumer Lending & NBFC', exchange: 'NSE', aliases: ['bajaj', 'finance'] },
+      { ticker: 'INFY.NS', name: 'Infosys Ltd.', sector: 'IT Consulting & Cloud', exchange: 'NSE', aliases: ['infosys', 'infy', 'it'] },
+      { ticker: 'WIPRO.NS', name: 'Wipro Ltd.', sector: 'IT Services', exchange: 'NSE', aliases: ['wipro'] },
+      { ticker: 'HCLTECH.NS', name: 'HCL Technologies Ltd.', sector: 'IT Services', exchange: 'NSE', aliases: ['hcl'] },
+      { ticker: 'ITC.NS', name: 'ITC Limited', sector: 'FMCG, Cigarettes & Hotels', exchange: 'NSE', aliases: ['itc'] },
+      { ticker: 'BHARTIARTL.NS', name: 'Bharti Airtel Ltd.', sector: 'Telecom & 5G', exchange: 'NSE', aliases: ['airtel', 'bharti'] },
+      { ticker: 'MARUTI.NS', name: 'Maruti Suzuki India Ltd.', sector: 'Automobiles', exchange: 'NSE', aliases: ['maruti', 'suzuki'] },
+      { ticker: 'SUNPHARMA.NS', name: 'Sun Pharmaceutical Ltd.', sector: 'Pharma & Healthcare', exchange: 'NSE', aliases: ['sun pharma', 'medicine'] },
+
+      // US Tech & Global Giants
+      { ticker: 'AAPL', name: 'Apple Inc.', sector: 'Consumer Tech & iPhone', exchange: 'NASDAQ', aliases: ['apple', 'iphone', 'mac'] },
+      { ticker: 'NVDA', name: 'NVIDIA Corporation', sector: 'AI GPUs & Chips', exchange: 'NASDAQ', aliases: ['nvidia', 'chips', 'gpu', 'ai'] },
+      { ticker: 'TSLA', name: 'Tesla Inc.', sector: 'Electric Vehicles & Clean Energy', exchange: 'NASDAQ', aliases: ['tesla', 'elon musk', 'ev'] },
+      { ticker: 'MSFT', name: 'Microsoft Corporation', sector: 'Cloud, Windows & Copilot', exchange: 'NASDAQ', aliases: ['microsoft', 'windows', 'azure'] },
+      { ticker: 'AMZN', name: 'Amazon.com Inc.', sector: 'E-Commerce & AWS Cloud', exchange: 'NASDAQ', aliases: ['amazon', 'aws'] },
+      { ticker: 'GOOGL', name: 'Alphabet Inc. (Google)', sector: 'Search & Cloud AI', exchange: 'NASDAQ', aliases: ['google', 'alphabet', 'youtube'] },
+      { ticker: 'META', name: 'Meta Platforms Inc.', sector: 'Social Media (Facebook/Instagram)', exchange: 'NASDAQ', aliases: ['meta', 'facebook', 'instagram'] },
+      { ticker: 'NFLX', name: 'Netflix Inc.', sector: 'Streaming Entertainment', exchange: 'NASDAQ', aliases: ['netflix', 'movies'] },
+      { ticker: 'AMD', name: 'Advanced Micro Devices', sector: 'Semiconductors & CPUs', exchange: 'NASDAQ', aliases: ['amd', 'ryzen'] },
+      { ticker: 'INTC', name: 'Intel Corporation', sector: 'Semiconductors', exchange: 'NASDAQ', aliases: ['intel'] }
+    ];
+
+    const COMPANY_MAP = {};
+    STOCK_CATALOG.forEach(s => {
+      COMPANY_MAP[s.ticker] = `${s.name} • ${s.sector} (${s.exchange})`;
+    });
+
+    // Real-Time Case-Insensitive Autocomplete Search Function
+    function onSearchInput(query) {
+      const q = (query || '').trim().toLowerCase();
+      const dropdown = document.getElementById('searchResultsDropdown');
+      const clearBtn = document.getElementById('searchClearBtn');
+
+      if (!q) {
+        dropdown.classList.add('hidden');
+        clearBtn.classList.add('hidden');
+        return;
+      }
+      clearBtn.classList.remove('hidden');
+
+      const matches = STOCK_CATALOG.filter(s =>
+        s.name.toLowerCase().includes(q) ||
+        s.ticker.toLowerCase().includes(q) ||
+        s.sector.toLowerCase().includes(q) ||
+        (s.aliases && s.aliases.some(a => a.toLowerCase().includes(q)))
+      ).slice(0, 7);
+
+      if (matches.length === 0) {
+        dropdown.innerHTML = `
+          <div class="p-3.5 text-xs text-slate-400 text-center font-mono">
+            No exact matches for "<span class="text-white font-semibold">${query}</span>". 
+            <button onclick="selectStock('${query.toUpperCase()}', '${query.toUpperCase()} Equities')" class="mt-1 block mx-auto text-[#FF9900] font-bold hover:underline">
+              ANALYZE CUSTOM TICKER: ${query.toUpperCase()} &lt;GO&gt;
+            </button>
+          </div>
+        `;
+      } else {
+        dropdown.innerHTML = matches.map(s => `
+          <div onclick="selectStock('${s.ticker}', '${s.name.replace(/'/g, "\\'")}')" class="p-3 hover:bg-[#1E252E] cursor-pointer flex items-center justify-between transition group border-b border-[#2A313A]/50 last:border-0 font-mono">
+            <div>
+              <div class="flex items-center space-x-2">
+                <span class="font-bold text-white text-xs group-hover:text-[#FF9900] transition">${s.name}</span>
+                <span class="text-[9px] px-1.5 py-0.5 rounded-sm bg-[#0B0E11] text-slate-400 font-mono border border-[#2A313A]">${s.exchange}</span>
+              </div>
+              <span class="text-[11px] text-slate-400 block mt-0.5">${s.sector}</span>
+            </div>
+            <span class="px-2.5 py-1 rounded-sm bg-[#FF9900]/10 text-[#FF9900] font-mono font-bold text-xs border border-[#FF9900]/30 group-hover:bg-[#FF9900] group-hover:text-black transition">
+              ${s.ticker}
+            </span>
+          </div>
+        `).join('');
+      }
+      dropdown.classList.remove('hidden');
+    }
+
+    function selectStock(ticker, displayName) {
+      document.getElementById('tickerInput').value = ticker;
+      document.getElementById('stockSearchInput').value = displayName || ticker;
+      document.getElementById('searchResultsDropdown').classList.add('hidden');
+      document.getElementById('searchClearBtn').classList.remove('hidden');
+      switchTab('screener');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      analyzeStock(ticker);
+    }
+
+    function onSearchEnter() {
+      const q = document.getElementById('stockSearchInput').value.trim().toLowerCase();
+      if (!q) return;
+      document.getElementById('searchResultsDropdown').classList.add('hidden');
+      const match = STOCK_CATALOG.find(s =>
+        s.ticker.toLowerCase() === q ||
+        s.name.toLowerCase() === q ||
+        s.name.toLowerCase().includes(q) ||
+        (s.aliases && s.aliases.some(a => a.toLowerCase().includes(q) || q.includes(a.toLowerCase())))
+      );
+      if (match) {
+        selectStock(match.ticker, match.name);
+      } else {
+        selectStock(q.toUpperCase(), q.toUpperCase());
+      }
+    }
+
+    function clearSearch() {
+      document.getElementById('stockSearchInput').value = '';
+      document.getElementById('searchClearBtn').classList.add('hidden');
+      document.getElementById('searchResultsDropdown').classList.add('hidden');
+      document.getElementById('stockSearchInput').focus();
+    }
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', (e) => {
+      const dropdown = document.getElementById('searchResultsDropdown');
+      const input = document.getElementById('stockSearchInput');
+      if (dropdown && !dropdown.contains(e.target) && e.target !== input) {
+        dropdown.classList.add('hidden');
+      }
+    });
+
+    function quickSelect(t) {
+      const match = STOCK_CATALOG.find(s => s.ticker === t);
+      selectStock(t, match ? match.name : t);
+    }
+
+    function loadBasket(type) {
+      const input = document.getElementById('portTickers');
+      if (type === 'ai') {
+        input.value = 'NVDA, MSFT, AAPL, GOOGL';
+      } else if (type === 'india') {
+        input.value = 'RELIANCE.NS, TCS.NS, HDFCBANK.NS, INFY.NS';
+      } else if (type === 'mobility') {
+        input.value = 'TSLA, NVDA, AAPL, AMZN';
+      } else if (type === 'balanced') {
+        input.value = 'MSFT, AAPL, HDFCBANK.NS, AMZN';
+      }
+      optimizePortfolio();
+    }
+
+    async function analyzeStock(explicitTicker = null) {
+      let ticker = explicitTicker;
+      if (!ticker) {
+        const tickerVal = document.getElementById('tickerInput').value.trim().toUpperCase();
+        const searchVal = document.getElementById('stockSearchInput').value.trim();
+
+        if (searchVal) {
+          const q = searchVal.toLowerCase();
+          const match = STOCK_CATALOG.find(s =>
+            s.ticker.toLowerCase() === q ||
+            s.name.toLowerCase() === q ||
+            s.name.toLowerCase().includes(q) ||
+            (s.aliases && s.aliases.some(a => a.toLowerCase().includes(q) || q.includes(a.toLowerCase())))
+          );
+          if (match) {
+            ticker = match.ticker;
+          } else if (!searchVal.includes(' ') && searchVal.length <= 15) {
+            ticker = searchVal.toUpperCase();
+          } else {
+            ticker = tickerVal || 'AAPL';
+          }
+        } else {
+          ticker = tickerVal || 'AAPL';
+        }
+      }
+
+      // Synchronize both input fields
+      document.getElementById('tickerInput').value = ticker;
+      const catalogEntry = STOCK_CATALOG.find(s => s.ticker === ticker);
+      if (catalogEntry) {
+        document.getElementById('stockSearchInput').value = catalogEntry.name;
+        document.getElementById('searchClearBtn').classList.remove('hidden');
+      }
+
+      const riskTolerance = document.getElementById('riskTolerance').value;
+      const btn = document.getElementById('btnAnalyze');
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> <span>ANALYZING...</span>';
+      btn.disabled = true;
+
+      try {
+        const res = await fetch('/api/analyze', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ticker, risk_tolerance: riskTolerance })
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          alert('Analysis Error: ' + (data.error || 'Server error'));
+          return;
+        }
+        renderAnalysis(data);
+      } catch (err) {
+        console.error(err);
+        alert('Could not reach backend API. Make sure python server.py is running.');
+      } finally {
+        btn.innerHTML = '<i class="fa-solid fa-bolt"></i> <span>ANALYZE &lt;GO&gt;</span>';
+        btn.disabled = false;
+      }
+    }
+
+    function setTimeframe(tf) {
+      activeTimeframe = tf;
+      document.querySelectorAll('.tf-btn').forEach(b => {
+        b.classList.remove('bg-[#FF9900]', 'text-black', 'font-black', 'shadow-sm');
+        b.classList.add('text-slate-400', 'hover:text-white', 'hover:bg-[#1E252E]');
+      });
+      const activeBtn = document.getElementById('tf-' + tf);
+      if (activeBtn) {
+        activeBtn.classList.remove('text-slate-400', 'hover:text-white', 'hover:bg-[#1E252E]');
+        activeBtn.classList.add('bg-[#FF9900]', 'text-black', 'font-black', 'shadow-sm');
+      }
+
+      if (!rawChartData || !rawChartData.dates || rawChartData.dates.length === 0) return;
+
+      let count = rawChartData.dates.length;
+      if (tf === '1M') count = Math.min(22, rawChartData.dates.length);
+      else if (tf === '3M') count = Math.min(66, rawChartData.dates.length);
+      else if (tf === '6M') count = Math.min(132, rawChartData.dates.length);
+      else if (tf === '1Y') count = rawChartData.dates.length;
+
+      const slicedData = {
+        dates: rawChartData.dates.slice(-count),
+        prices: rawChartData.prices.slice(-count),
+        sma20: rawChartData.sma20.slice(-count),
+        sma50: rawChartData.sma50.slice(-count)
+      };
+
+      renderPriceChart(slicedData);
+    }
+
+    function renderAnalysis(d) {
+      document.getElementById('dispTicker').innerText = d.ticker;
+      document.getElementById('dispCompanyName').innerText = COMPANY_MAP[d.ticker] || (d.ticker + ' • Equities');
+      document.getElementById('dispPrice').innerText = '$' + d.current_price.toLocaleString(undefined, {minimumFractionDigits: 2});
+      
+      const chgEl = document.getElementById('dispChange');
+      chgEl.innerText = (d.daily_change_pct >= 0 ? '+' : '') + d.daily_change_pct.toFixed(2) + '%';
+      if (d.daily_change_pct >= 0) {
+        chgEl.className = 'px-2.5 py-1 rounded-sm text-xs font-bold font-mono bg-emerald-500/15 text-[#00E676] border border-[#00E676]/30';
+      } else {
+        chgEl.className = 'px-2.5 py-1 rounded-sm text-xs font-bold font-mono bg-rose-500/15 text-[#FF1744] border border-[#FF1744]/30';
+      }
+
+      document.getElementById('dispSummaryMsg').innerText = d.summary_msg;
+      document.getElementById('dispRsi').innerText = d.rsi;
+      document.getElementById('dispSma50').innerText = '$' + d.sma_50.toFixed(2);
+      document.getElementById('dispVol').innerText = d.volatility_pct + '%';
+
+      // Signal Card
+      const card = document.getElementById('signalCard');
+      card.classList.remove('glow-emerald', 'glow-rose', 'glow-amber');
+      const badge = document.getElementById('signalBadge');
+
+      if (d.signal === 'BUY') {
+        card.classList.add('glow-emerald');
+        badge.className = 'inline-flex items-center space-x-2 px-6 py-2.5 rounded-sm text-2xl font-black font-mono tracking-wider bg-emerald-500/20 text-[#00E676] border border-[#00E676]/40';
+        badge.innerHTML = '<i class="fa-solid fa-arrow-trend-up"></i> <span>BUY</span>';
+      } else if (d.signal === 'SELL') {
+        card.classList.add('glow-rose');
+        badge.className = 'inline-flex items-center space-x-2 px-6 py-2.5 rounded-sm text-2xl font-black font-mono tracking-wider bg-rose-500/20 text-[#FF1744] border border-[#FF1744]/40';
+        badge.innerHTML = '<i class="fa-solid fa-arrow-trend-down"></i> <span>SELL</span>';
+      } else {
+        card.classList.add('glow-amber');
+        badge.className = 'inline-flex items-center space-x-2 px-6 py-2.5 rounded-sm text-2xl font-black font-mono tracking-wider bg-[#FF9900]/20 text-[#FF9900] border border-[#FF9900]/40';
+        badge.innerHTML = '<i class="fa-solid fa-arrows-left-right"></i> <span>HOLD</span>';
+      }
+
+      document.getElementById('dispSignalTone').innerText = d.signal_tone;
+      document.getElementById('dispConfidence').innerText = d.confidence_pct + '%';
+      document.getElementById('confidenceBar').style.width = d.confidence_pct + '%';
+
+      document.getElementById('dispStopLoss').innerText = '$' + d.stop_loss.toLocaleString(undefined, {minimumFractionDigits: 2});
+      document.getElementById('dispRiskAmt').innerText = '-$' + d.risk_amount.toFixed(2);
+      document.getElementById('dispTargetPrice').innerText = '$' + d.target_price.toLocaleString(undefined, {minimumFractionDigits: 2});
+      document.getElementById('dispRewardAmt').innerText = '+$' + d.reward_amount.toFixed(2);
+
+      // Technical Scorecard Updates
+      if (document.getElementById('scorecardRsiVal')) {
+        document.getElementById('scorecardRsiVal').innerText = d.rsi;
+        document.getElementById('scorecardRsiTrack').style.width = Math.min(100, Math.max(5, d.rsi)) + '%';
+        const rsiBadge = document.getElementById('scorecardRsiBadge');
+        rsiBadge.innerText = d.rsi_status || 'RSI ' + d.rsi;
+        rsiBadge.className = 'px-2 py-0.5 rounded-sm text-[10px] font-bold ' + 
+          (d.rsi_color === 'emerald' ? 'bg-emerald-500/15 text-[#00E676] border border-[#00E676]/30' : 
+          (d.rsi_color === 'rose' ? 'bg-rose-500/15 text-[#FF1744] border border-[#FF1744]/30' : 'bg-[#FF9900]/15 text-[#FF9900] border border-[#FF9900]/30'));
+
+        const macdBadge = document.getElementById('scorecardMacdBadge');
+        macdBadge.innerText = d.macd_status || 'MACD Signal';
+        macdBadge.className = 'px-2 py-0.5 rounded-sm text-[10px] font-bold ' + 
+          (d.macd_color === 'emerald' ? 'bg-emerald-500/15 text-[#00E676] border border-[#00E676]/30' : 'bg-rose-500/15 text-[#FF1744] border border-[#FF1744]/30');
+        document.getElementById('scorecardMacdMsg').innerText = 
+          `MACD: ${d.macd >= 0 ? '+' : ''}${d.macd} | Sig: ${d.macd_signal >= 0 ? '+' : ''}${d.macd_signal} (Hist: ${d.macd_hist >= 0 ? '+' : ''}${d.macd_hist})`;
+
+        document.getElementById('scorecardVolVal').innerText = d.volatility_pct + '%';
+        const volBadge = document.getElementById('scorecardVolBadge');
+        volBadge.innerText = d.vol_risk || 'Volatility ' + d.volatility_pct + '%';
+        volBadge.className = 'px-2 py-0.5 rounded-sm text-[10px] font-bold ' + 
+          (d.vol_color === 'emerald' ? 'bg-emerald-500/15 text-[#00E676] border border-[#00E676]/30' : 
+          (d.vol_color === 'rose' ? 'bg-rose-500/15 text-[#FF1744] border border-[#FF1744]/30' : 'bg-[#FF9900]/15 text-[#FF9900] border border-[#FF9900]/30'));
+        document.getElementById('scorecardVolTrack').style.width = Math.min(100, Math.max(10, d.volatility_pct * 2.2)) + '%';
+
+        document.getElementById('scorecardMaMsg').innerText = d.ma_trend || 'Golden Alignment';
+        const maIcon = document.getElementById('scorecardMaIcon');
+        maIcon.innerHTML = d.ma_trend_color === 'emerald' 
+          ? '<i class="fa-solid fa-arrow-trend-up"></i>' 
+          : (d.ma_trend_color === 'rose' ? '<i class="fa-solid fa-arrow-trend-down"></i>' : '<i class="fa-solid fa-arrows-left-right"></i>');
+        maIcon.className = 'w-8 h-8 rounded-sm flex items-center justify-center text-xs ' + 
+          (d.ma_trend_color === 'emerald' ? 'bg-emerald-500/15 text-[#00E676] border border-[#00E676]/30' : 
+          (d.ma_trend_color === 'rose' ? 'bg-rose-500/15 text-[#FF1744] border border-[#FF1744]/30' : 'bg-[#FF9900]/15 text-[#FF9900] border border-[#FF9900]/30'));
+      }
+
+      // Memo Content
+      document.getElementById('memoContent').innerText = d.investment_memo;
+
+      // Store raw chart data and apply current timeframe
+      rawChartData = d.chart;
+      setTimeframe(activeTimeframe);
+    }
+
+    function renderPriceChart(chartData) {
+      const ctx = document.getElementById('priceChartCanvas').getContext('2d');
+      if (priceChart) priceChart.destroy();
+
+      priceChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: chartData.dates,
+          datasets: [
+            {
+              label: 'Close Price',
+              data: chartData.prices,
+              borderColor: '#FF9900',
+              backgroundColor: 'rgba(255, 153, 0, 0.08)',
+              borderWidth: 2,
+              fill: true,
+              tension: 0.1,
+              pointRadius: 0
+            },
+            {
+              label: '20 SMA',
+              data: chartData.sma20,
+              borderColor: '#00E676',
+              borderWidth: 1.5,
+              pointRadius: 0,
+              borderDash: [4, 4]
+            },
+            {
+              label: '50 SMA',
+              data: chartData.sma50,
+              borderColor: '#00E5FF',
+              borderWidth: 1.5,
+              pointRadius: 0,
+              borderDash: [5, 5]
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          interaction: { mode: 'index', intersect: false },
+          scales: {
+            x: { grid: { color: '#1C242D' }, ticks: { color: '#94A3B8', font: { family: 'monospace', size: 10 } } },
+            y: { grid: { color: '#1C242D' }, ticks: { color: '#94A3B8', font: { family: 'monospace', size: 10 } } }
+          },
+          plugins: {
+            legend: { labels: { color: '#F1F5F9', font: { family: 'monospace', size: 11 } } }
+          }
+        }
+      });
+    }
+
+    async function optimizePortfolio() {
+      const tickersRaw = document.getElementById('portTickers').value;
+      const capital = parseFloat(document.getElementById('portCapital').value) || 10000;
+      const tickers = tickersRaw.split(',').map(s => s.trim().toUpperCase());
+
+      const btn = document.getElementById('btnOptimize');
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+      btn.disabled = true;
+
+      try {
+        const res = await fetch('/api/optimize', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ tickers, capital })
+        });
+        const data = await res.json();
+        lastPortfolioData = data;
+        
+        document.getElementById('dispSharpe').innerText = data.sharpe_ratio;
+        document.getElementById('dispExpReturn').innerText = '+' + data.expected_annual_return_pct + '%';
+        document.getElementById('dispExpVol').innerText = data.annual_volatility_pct + '%';
+
+        let rows = '';
+        const labels = [];
+        const weights = [];
+        const colors = ['#FF9900', '#00E5FF', '#00E676', '#FF1744', '#E0E6ED'];
+
+        data.allocations.forEach((item, idx) => {
+          labels.push(item.ticker);
+          weights.push(item.weight_pct);
+          rows += `
+            <tr class="hover:bg-[#1E252E] transition border-b border-[#2A313A]/50 last:border-0 font-mono text-xs">
+              <td class="py-3 px-4 font-bold text-white flex items-center">
+                <span class="w-2.5 h-2.5 mr-2 rounded-none" style="background-color: ${colors[idx % colors.length]}"></span>
+                ${item.ticker}
+              </td>
+              <td class="py-3 px-4 font-bold text-[#FF9900]">${item.weight_pct}%</td>
+              <td class="py-3 px-4 text-white font-bold">$${item.allocation_dollars.toLocaleString()}</td>
+            </tr>
+          `;
+        });
+        document.getElementById('portTableBody').innerHTML = rows;
+
+        // Render Pie Chart
+        const ctx = document.getElementById('portPieCanvas').getContext('2d');
+        if (pieChart) pieChart.destroy();
+        pieChart = new Chart(ctx, {
+          type: 'doughnut',
+          data: {
+            labels: labels,
+            datasets: [{
+              data: weights,
+              backgroundColor: colors.slice(0, labels.length),
+              borderWidth: 1,
+              borderColor: '#0B0E11'
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '70%',
+            plugins: { legend: { position: 'bottom', labels: { color: '#F1F5F9', font: { family: 'monospace', size: 10 } } } }
+          }
+        });
+
+      } catch (err) {
+        console.error(err);
+      } finally {
+        btn.innerHTML = '<i class="fa-solid fa-sliders"></i> <span>REBALANCE &lt;GO&gt;</span>';
+        btn.disabled = false;
+      }
+    }
+
+    function exportPortfolioCSV() {
+      if (!lastPortfolioData || !lastPortfolioData.allocations) {
+        alert('Please run portfolio rebalancing first.');
+        return;
+      }
+      const headers = ['Ticker', 'Optimal Weight (%)', 'Allocated Capital ($)', 'Target Sharpe Ratio'];
+      const rows = lastPortfolioData.allocations.map(a => [
+        `"${a.ticker}"`,
+        `"${a.weight_pct}%"`,
+        `"$${a.allocation_dollars.toLocaleString()}"`,
+        `"${lastPortfolioData.sharpe_ratio}"`
+      ]);
+      const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement('a');
+      link.setAttribute('href', encodedUri);
+      link.setAttribute('download', `AeroQuant_Portfolio_Allocation_${new Date().toISOString().slice(0, 10)}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    async function loadWatchlist() {
+      try {
+        const res = await fetch('/api/watchlist');
+        const data = await res.json();
+        let rows = '';
+        data.watchlist.forEach(w => {
+          const chgClass = w.change_pct >= 0 ? 'text-[#00E676]' : 'text-[#FF1744]';
+          const chgSign = w.change_pct >= 0 ? '+' : '';
+          const trendBadge = w.trend === 'Bullish' 
+            ? 'bg-emerald-500/15 text-[#00E676] border border-[#00E676]/40' 
+            : (w.trend === 'Bearish' ? 'bg-rose-500/15 text-[#FF1744] border border-[#FF1744]/40' : 'bg-[#FF9900]/15 text-[#FF9900] border border-[#FF9900]/40');
+
+          rows += `
+            <tr class="hover:bg-[#1E252E] transition duration-150 group border-b border-[#2A313A]/40 last:border-0 font-mono text-xs">
+              <td class="py-3.5 px-4 font-bold text-white">
+                <div class="flex items-center space-x-2.5">
+                  <div class="w-8 h-8 rounded-sm bg-[#0B0E11] border border-[#2A313A] flex items-center justify-center text-[#FF9900] text-xs font-bold font-mono group-hover:border-[#FF9900] transition">
+                    ${w.ticker.split('.')[0].slice(0, 3)}
+                  </div>
+                  <div>
+                    <span class="font-bold text-white text-xs block group-hover:text-[#FF9900] transition">${w.name}</span>
+                    <span class="text-[10px] text-slate-400 font-mono tracking-wide">${w.ticker}</span>
+                  </div>
+                </div>
+              </td>
+              <td class="py-3.5 px-4 text-slate-400 text-xs font-medium">${w.category}</td>
+              <td class="py-3.5 px-4 font-bold text-white font-mono text-xs">$${w.price.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+              <td class="py-3.5 px-4 font-mono font-bold ${chgClass}">
+                <span class="inline-flex items-center px-2 py-0.5 rounded-sm text-[11px] font-semibold ${w.change_pct >= 0 ? 'bg-emerald-500/10' : 'bg-rose-500/10'}">
+                  ${w.change_pct >= 0 ? '▲ ' : '▼ '}${chgSign}${w.change_pct.toFixed(2)}%
+                </span>
+              </td>
+              <td class="py-3.5 px-4 text-[#FF9900] font-mono font-semibold text-xs">${w.rsi}</td>
+              <td class="py-3.5 px-4">
+                <span class="px-2.5 py-0.5 rounded-sm text-[10px] font-bold tracking-wider uppercase border ${trendBadge}">
+                  ${w.trend}
+                </span>
+              </td>
+              <td class="py-3.5 px-4 text-right">
+                <button onclick="selectStock('${w.ticker}', '${w.name.replace(/'/g, "\\'")}')" class="px-3 py-1.5 rounded-sm bg-[#FF9900] hover:bg-[#E68A00] text-[11px] text-black font-black uppercase tracking-wider transition flex items-center space-x-1.5 ml-auto shadow-sm cursor-pointer">
+                  <i class="fa-solid fa-bolt text-[10px]"></i>
+                  <span>ANALYZE &lt;GO&gt;</span>
+                </button>
+              </td>
+            </tr>
+          `;
+        });
+        document.getElementById('watchlistTableBody').innerHTML = rows;
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    async function runBacktest() {
+      const ticker = document.getElementById('backtestTicker').value.trim().toUpperCase() || 'AAPL';
+      const capital = parseFloat(document.getElementById('backtestCapital').value) || 1000;
+      const btn = document.getElementById('btnBacktest');
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+      btn.disabled = true;
+
+      try {
+        const res = await fetch('/api/backtest', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ticker, capital })
+        });
+        const data = await res.json();
+
+        document.getElementById('btMlReturn').innerText = (data.ml_return_pct >= 0 ? '+' : '') + data.ml_return_pct + '%';
+        document.getElementById('btBhReturn').innerText = (data.bh_return_pct >= 0 ? '+' : '') + data.bh_return_pct + '%';
+        document.getElementById('btAlpha').innerText = (data.excess_alpha_pct >= 0 ? '+' : '') + data.excess_alpha_pct + '%';
+        document.getElementById('btWinRate').innerText = data.win_rate_pct + '%';
+
+        // Render Timeline Chart
+        const ctx = document.getElementById('backtestChartCanvas').getContext('2d');
+        if (backtestChart) backtestChart.destroy();
+
+        backtestChart = new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: data.timeline.dates,
+            datasets: [
+              {
+                label: 'ML Strategy',
+                data: data.timeline.strategy_equity,
+                borderColor: '#00E676',
+                backgroundColor: 'rgba(0, 230, 118, 0.08)',
+                borderWidth: 2,
+                fill: true,
+                tension: 0.1,
+                pointRadius: 0
+              },
+              {
+                label: 'Buy & Hold',
+                data: data.timeline.buy_hold_equity,
+                borderColor: '#64748B',
+                borderWidth: 1.5,
+                pointRadius: 0,
+                borderDash: [4, 4]
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: { mode: 'index', intersect: false },
+            scales: {
+              x: { grid: { color: '#1C242D' }, ticks: { color: '#94A3B8', font: { family: 'monospace', size: 10 } } },
+              y: { grid: { color: '#1C242D' }, ticks: { color: '#94A3B8', font: { family: 'monospace', size: 10 } } }
+            },
+            plugins: {
+              legend: { display: false }
+            }
+          }
+        });
+
+      } catch (err) {
+        console.error(err);
+      } finally {
+        btn.innerHTML = '<i class="fa-solid fa-play"></i> <span>RUN BACKTEST &lt;GO&gt;</span>';
+        btn.disabled = false;
+      }
+    }
+
+    function copyMemo() {
+      const text = document.getElementById('memoContent').innerText;
+      navigator.clipboard.writeText(text);
+      alert('Investment memo copied to clipboard!');
+    }
+
+    function printMemo() {
+      const content = document.getElementById('memoContent').innerText;
+      const win = window.open('', '', 'height=600,width=800');
+      win.document.write('<html><head><title>Investment Analysis Memo</title>');
+      win.document.write('<style>body{font-family:monospace;padding:30px;white-space:pre-wrap;font-size:13px;line-height:1.6;}</style>');
+      win.document.write('</head><body>');
+      win.document.write(content);
+      win.document.write('</body></html>');
+      win.document.close();
+      win.print();
+    }
+
+    async function loadMarketTape() {
+      try {
+        const res = await fetch('/api/watchlist');
+        const data = await res.json();
+        if (!data || !data.watchlist) return;
+        const htmlItems = data.watchlist.map(w => {
+          const chgSign = w.change_pct >= 0 ? '+' : '';
+          const chgClass = w.change_pct >= 0 ? 'text-[#00E676]' : 'text-[#FF1744]';
+          const symbol = w.ticker.split('.')[0];
+          return `
+            <div onclick="selectStock('${w.ticker}', '${w.name.replace(/'/g, "\\'")}')" class="inline-flex items-center space-x-2 cursor-pointer hover:bg-[#1E252E] px-3 py-1 rounded-sm transition group border border-transparent hover:border-[#2A313A] font-mono">
+              <span class="font-bold text-white text-xs group-hover:text-[#FF9900] transition">${symbol}</span>
+              <span class="text-[10px] text-slate-400 font-mono font-medium">${w.category.split('/')[0].trim()}</span>
+              <span class="font-mono text-white text-xs font-bold">$${w.price.toFixed(2)}</span>
+              <span class="text-[10px] font-bold font-mono ${chgClass}">
+                ${w.change_pct >= 0 ? '▲ ' : '▼ '}${chgSign}${w.change_pct.toFixed(2)}%
+              </span>
+            </div>
+          `;
+        }).join('');
+        // Duplicate for infinite seamless marquee loop
+        document.getElementById('tickerTapeTrack').innerHTML = htmlItems + htmlItems;
+      } catch (e) {
+        console.error('Market tape load error:', e);
+      }
+    }
+
+    window.onload = () => {
+      analyzeStock();
+      loadMarketTape();
+    };
+  </script>
+</body>
+</html>
