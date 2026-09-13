@@ -34,7 +34,7 @@ def deploy_sagemaker_stock_model(
     os.makedirs(local_data_dir, exist_ok=True)
     data_files = [f for f in os.listdir(local_data_dir) if f.endswith(".csv")]
 
-    bucket_name = s3_bucket or "aeroquant-market-data-lake"
+    bucket_name = s3_bucket or "aeroquant-market-data-992483130712"
     s3_data_uri = f"s3://{bucket_name}/{s3_prefix}/data"
 
     print(f"\n[2/4] Amazon S3 Data Lake Staging:")
@@ -56,7 +56,7 @@ def deploy_sagemaker_stock_model(
         print("  Pipeline Stage:      S3 dataset manifest and schema verified.")
 
     # 3. SageMaker Training Job Specification
-    role = role_arn or "arn:aws:iam::123456789012:role/service-role/AmazonSageMaker-ExecutionRole"
+    role = role_arn or "arn:aws:iam::992483130712:role/AeroQuantSageMakerRole"
     print(f"\n[3/4] Amazon SageMaker Scikit-Learn Estimator:")
     print(f"  Execution Role:      {role}")
     print(f"  Framework:           Scikit-Learn (Random Forest 100 Trees)")

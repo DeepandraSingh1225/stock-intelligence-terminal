@@ -46,9 +46,11 @@ class QuantEngine:
         feat_vals = [float(latest[col]) if not np.isnan(latest[col]) else 0.0 for col in FEATURE_COLS]
         feat_vector = pd.DataFrame([feat_vals], columns=FEATURE_COLS)
 
-        # Check if AWS SageMaker Serverless Endpoint is active in environment
+        # Check if AWS API Gateway or SageMaker Endpoint is active
+        api_gateway_url = os.environ.get("AWS_API_GATEWAY_URL", "https://kfc073dfuj.execute-api.us-east-1.amazonaws.com")
         sagemaker_endpoint = os.environ.get("SAGEMAKER_ENDPOINT_NAME")
         prob_up = None
+
         if sagemaker_endpoint:
             try:
                 import boto3
@@ -60,6 +62,27 @@ class QuantEngine:
                     Body=csv_payload
                 )
                 prob_up = float(response["Body"].read().decode("utf-8").strip())
+            except Exception:
+                prob_up = None
+
+        if prob_up is None and api_gateway_url:
+            try:
+                import urllib.request, json
+                payload = {
+                    "ticker": ticker,
+                    "rsi": float(latest["RSI"]) if not np.isnan(latest["RSI"]) else 50.0,
+                    "sma_ratio": float(latest["SMA_Ratio"]) if not np.isnan(latest["SMA_Ratio"]) else 1.0,
+                    "macd_hist": float(latest["MACD_Hist"]) if not np.isnan(latest["MACD_Hist"]) else 0.0,
+                    "volatility": float(latest["Volatility"]) if not np.isnan(latest["Volatility"]) else 0.20,
+                    "daily_return": float(daily_change_pct / 100.0),
+                    "current_price": current_price
+                }
+                req_data = json.dumps(payload).encode("utf-8")
+                req = urllib.request.Request(api_gateway_url, data=req_data, headers={"Content-Type": "application/json"}, method="POST")
+                with urllib.request.urlopen(req, timeout=3) as resp:
+                    resp_json = json.loads(resp.read().decode("utf-8"))
+                    if "confidence_pct" in resp_json:
+                        prob_up = float(resp_json["confidence_pct"]) / 100.0
             except Exception:
                 prob_up = None
 
