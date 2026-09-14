@@ -1,6 +1,17 @@
 # 📈 AeroQuant | Quantitative Stock Intelligence & Portfolio Risk Engine
 
-An end-to-end quantitative financial analytics platform combining **Random Forest machine learning**, **technical indicators (RSI, MACD, Moving Averages)**, **Modern Portfolio Theory (Sharpe Ratio)**, and **AWS SageMaker cloud deployment**.
+An end-to-end quantitative financial analytics platform combining **Random Forest machine learning**, **technical indicators (RSI, MACD, Moving Averages)**, **Modern Portfolio Theory (Sharpe Ratio)**, and **AWS Cloud Architecture (EC2, S3, Lambda, API Gateway)**.
+
+---
+
+## 🌐 Live Cloud Deployment Links
+
+| Resource | URL / Access | Description |
+| :--- | :--- | :--- |
+| **Live Web Terminal (HTTPS)** | **[https://investor-councils-norman-vary.trycloudflare.com](https://investor-councils-norman-vary.trycloudflare.com)** | Secure SSL production link |
+| **AWS EC2 Public Domain** | **[http://ec2-100-48-83-175.compute-1.amazonaws.com](http://ec2-100-48-83-175.compute-1.amazonaws.com)** | Official Amazon AWS instance link |
+| **AWS API Gateway** | `https://kfc073dfuj.execute-api.us-east-1.amazonaws.com` | Serverless ML inference API |
+| **Amazon S3 Data Lake** | `s3://aeroquant-market-data-992483130712/` | 23 historical OHLCV datasets & model artifacts |
 
 ---
 

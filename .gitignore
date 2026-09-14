@@ -1,4 +1,4 @@
-﻿# Python Bytecode & Cache
+# Python Bytecode & Cache
 __pycache__/
 *.py[cod]
 *.class
@@ -27,3 +27,7 @@ ENV/
 Thumbs.db
 ehthumbs.db
 Desktop.ini
+
+# Logs & Scratch
+console_log*.txt
+ec2_instance.txt
