@@ -1,4 +1,4 @@
-﻿version: 1.0
+version: 1.0
 runtime: python3
 build:
   commands:
@@ -6,7 +6,7 @@ build:
       - pip install --upgrade pip
       - pip install -r requirements.txt
 run:
-  command: gunicorn --bind 0.0.0.0:8080 --workers 2 --timeout 120 server:app
+  command: uvicorn server:app --host 0.0.0.0 --port 8080
   network:
     port: 8080
     env: PORT

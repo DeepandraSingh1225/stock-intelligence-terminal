@@ -1,4 +1,4 @@
-﻿# ☁️ AeroQuant AWS Cloud Deployment Guide
+# ☁️ AeroQuant AWS Cloud Deployment Guide
 
 AeroQuant is architected natively around Amazon Web Services (AWS) across storage, training, serverless inference, and web hosting.
 
@@ -16,7 +16,7 @@ AeroQuant is architected natively around Amazon Web Services (AWS) across storag
 +-----------------------------------------------------------------------------------+
 |                            AWS APP RUNNER / ECS FARGATE                           |
 |  +-----------------------------------------------------------------------------+  |
-|  | Containerized Bloomberg Terminal Web Service (Flask + Gunicorn WSGI)        |  |
+|  | Containerized Bloomberg Terminal Web Service (FastAPI + Uvicorn ASGI)       |  |
 |  | Serves frontend UI, runs Portfolio Optimizer, Watchlist & Backtester        |  |
 |  +-----------------------------------------------------------------------------+  |
 +-----------------------------------------------------------------------------------+

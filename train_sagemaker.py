@@ -32,24 +32,23 @@ def deploy_sagemaker_stock_model(
     # 2. Stage Market Data to Amazon S3
     local_data_dir = os.path.join(os.path.dirname(__file__), "data")
     os.makedirs(local_data_dir, exist_ok=True)
-    data_files = [f for f in os.listdir(local_data_dir) if f.endswith(".csv")]
+    dataset_file = "all_stocks_5yr.csv"
+    dataset_path = os.path.join(local_data_dir, dataset_file)
 
     bucket_name = s3_bucket or "aeroquant-market-data-992483130712"
-    s3_data_uri = f"s3://{bucket_name}/{s3_prefix}/data"
+    s3_data_uri = f"s3://{bucket_name}/{s3_prefix}/data/{dataset_file}"
 
     print(f"\n[2/4] Amazon S3 Data Lake Staging:")
-    print(f"  Local Datasets:      {len(data_files)} tickers ({', '.join(data_files[:4])}...)")
+    print(f"  Master Dataset:      {dataset_file} (Kaggle S&P 500 Unified, ~29.5 MB)")
     print(f"  Target S3 Bucket:    {bucket_name}")
     print(f"  Target S3 URI:       {s3_data_uri}")
-    if has_creds:
+    if has_creds and os.path.exists(dataset_path):
         try:
             s3_client = session.client("s3")
-            print("  Uploading datasets to Amazon S3...")
-            for f in data_files[:5]:
-                file_path = os.path.join(local_data_dir, f)
-                s3_key = f"{s3_prefix}/data/{f}"
-                s3_client.upload_file(file_path, bucket_name, s3_key)
-            print(f"  Successfully staged datasets to S3 bucket.")
+            print("  Uploading master dataset to Amazon S3...")
+            s3_key = f"{s3_prefix}/data/{dataset_file}"
+            s3_client.upload_file(dataset_path, bucket_name, s3_key)
+            print(f"  Successfully staged {dataset_file} to S3 bucket.")
         except Exception as err:
             print(f"  S3 upload notice:    {err}")
     else:

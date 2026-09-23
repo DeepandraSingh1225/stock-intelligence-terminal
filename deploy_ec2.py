@@ -51,7 +51,7 @@ WorkingDirectory=/home/ec2-user/app
 Environment=PORT=5000
 Environment=AWS_DEFAULT_REGION=us-east-1
 Environment=AWS_API_GATEWAY_URL=https://kfc073dfuj.execute-api.us-east-1.amazonaws.com
-ExecStart=/usr/bin/python3.11 -m gunicorn --bind 0.0.0.0:5000 --workers 2 --timeout 120 server:app
+ExecStart=/usr/bin/python3.11 -m uvicorn server:app --host 0.0.0.0 --port 5000
 Restart=always
 RestartSec=5
 

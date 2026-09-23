@@ -1,75 +1,110 @@
 """
-Flask API Server for Quantitative Stock Intelligence Terminal
-Serves static frontend assets and exposes REST API endpoints for stock analysis,
-portfolio optimization, market watchlist, and backtesting.
+FastAPI Server for Quantitative Stock Intelligence Terminal
+Serves static frontend assets and exposes high-performance REST API endpoints
+for stock analysis, portfolio optimization, market watchlist, and backtesting.
+Interactive Swagger API documentation available at: /docs
 """
 
 import os
 import traceback
-from flask import Flask, request, jsonify, send_from_directory
-from flask_cors import CORS
+from typing import List, Optional
+from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
+from pydantic import BaseModel
 
 from quant_engine import QuantEngine
 
-app = Flask(__name__, static_folder="frontend", static_url_path="")
-CORS(app)
+app = FastAPI(
+    title="AeroQuant Financial Intelligence API",
+    description="Quantitative Financial Analytics & Machine Learning Inference API",
+    version="2.0.0"
+)
+
+# Enable CORS for frontend requests
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 engine = QuantEngine()
 
-@app.route("/")
+# Pydantic Schemas for Request Validation & Interactive Swagger Docs
+class AnalyzeRequest(BaseModel):
+    ticker: Optional[str] = "AAPL"
+    risk_tolerance: Optional[str] = "Moderate"
+
+class OptimizeRequest(BaseModel):
+    tickers: Optional[List[str]] = ["AAPL", "MSFT", "NVDA", "AMZN"]
+    capital: Optional[float] = 10000.0
+
+class BacktestRequest(BaseModel):
+    ticker: Optional[str] = "AAPL"
+    capital: Optional[float] = 1000.0
+
+@app.get("/")
 def index():
-    return send_from_directory("frontend", "index.html")
+    """Serves the main quantitative financial terminal UI."""
+    return FileResponse("frontend/index.html")
 
-@app.route("/api/analyze", methods=["POST"])
-def analyze_endpoint():
-    data = request.json or {}
-    ticker = data.get("ticker", "AAPL")
-    risk_tolerance = data.get("risk_tolerance", "Moderate")
+@app.post("/api/analyze")
+def analyze_endpoint(req: AnalyzeRequest):
+    """Generates AI signal, technical scorecard, and 1:2 risk-reward levels for a stock."""
     try:
-        result = engine.analyze_stock(ticker=ticker, risk_tolerance=risk_tolerance)
-        return jsonify(result)
+        ticker = req.ticker or "AAPL"
+        risk_tolerance = req.risk_tolerance or "Moderate"
+        return engine.analyze_stock(ticker=ticker, risk_tolerance=risk_tolerance)
     except Exception as e:
         traceback.print_exc()
-        return jsonify({"error": str(e)}), 500
+        raise HTTPException(status_code=500, detail=str(e))
 
-@app.route("/api/optimize", methods=["POST"])
-def optimize_endpoint():
-    data = request.json or {}
-    tickers = data.get("tickers", ["AAPL", "MSFT", "NVDA", "AMZN"])
-    capital = float(data.get("capital", 10000.0))
+@app.post("/api/optimize")
+def optimize_endpoint(req: OptimizeRequest):
+    """Calculates optimal Sharpe Ratio portfolio allocation across assets."""
     try:
-        result = engine.optimize_portfolio(tickers=tickers, capital=capital)
-        return jsonify(result)
+        tickers = req.tickers or ["AAPL", "MSFT", "NVDA", "AMZN"]
+        capital = float(req.capital or 10000.0)
+        return engine.optimize_portfolio(tickers=tickers, capital=capital)
     except Exception as e:
         traceback.print_exc()
-        return jsonify({"error": str(e)}), 500
+        raise HTTPException(status_code=500, detail=str(e))
 
-@app.route("/api/watchlist", methods=["GET"])
+@app.get("/api/watchlist")
 def watchlist_endpoint():
+    """Returns real-time indicators and trend momentum badges for top market leaders."""
     try:
         items = engine.get_watchlist()
-        return jsonify({"watchlist": items})
+        return {"watchlist": items}
     except Exception as e:
         traceback.print_exc()
-        return jsonify({"error": str(e)}), 500
+        raise HTTPException(status_code=500, detail=str(e))
 
-@app.route("/api/backtest", methods=["POST"])
-def backtest_endpoint():
-    data = request.json or {}
-    ticker = data.get("ticker", "AAPL")
-    capital = float(data.get("capital", 1000.0))
+@app.post("/api/backtest")
+def backtest_endpoint(req: BacktestRequest):
+    """Simulates 1-year historical trading performance vs Buy & Hold benchmark."""
     try:
-        result = engine.run_backtest(ticker=ticker, initial_capital=capital)
-        return jsonify(result)
+        ticker = req.ticker or "AAPL"
+        capital = float(req.capital or 1000.0)
+        return engine.run_backtest(ticker=ticker, initial_capital=capital)
     except Exception as e:
         traceback.print_exc()
-        return jsonify({"error": str(e)}), 500
+        raise HTTPException(status_code=500, detail=str(e))
 
 if __name__ == "__main__":
+    import uvicorn
+    import sys
+    if hasattr(sys.stdout, "reconfigure"):
+        try:
+            sys.stdout.reconfigure(encoding="utf-8")
+        except Exception:
+            pass
     port = int(os.environ.get("PORT", 5000))
-    debug = os.environ.get("FLASK_DEBUG", "True").lower() in ("true", "1")
-    print("\n" + "="*65)
-    print("📈 Quantitative Stock Intelligence Terminal Running at:")
-    print(f"👉 http://127.0.0.1:{port}")
-    print("="*65 + "\n")
-    app.run(host="0.0.0.0", port=port, debug=debug)
+    print("\n" + "=" * 65)
+    print("Quantitative Stock Intelligence Terminal (FastAPI) Running at:")
+    print(f"  * Web Terminal: http://127.0.0.1:{port}")
+    print(f"  * Swagger Docs: http://127.0.0.1:{port}/docs")
+    print("=" * 65 + "\n")
+    uvicorn.run(app, host="0.0.0.0", port=port)

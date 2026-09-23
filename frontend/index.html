@@ -212,10 +212,12 @@
         <!-- Quick Ticker Chips -->
         <div class="flex items-center space-x-1.5 overflow-x-auto text-xs pt-2 lg:pt-0">
           <span class="text-slate-400 font-mono text-[10px] mr-1 uppercase">QUICK:</span>
-          <button onclick="selectStock('HDFCBANK.NS', 'HDFC Bank Ltd.')" class="chip px-2.5 py-1 rounded bg-[#0B0E11] hover:bg-[#1E252E] text-slate-300 font-mono text-[11px] border border-[#2A313A] hover:border-[#FF9900] transition">HDFCBANK</button>
-          <button onclick="selectStock('RELIANCE.NS', 'Reliance Industries Ltd.')" class="chip px-2.5 py-1 rounded bg-[#0B0E11] hover:bg-[#1E252E] text-slate-300 font-mono text-[11px] border border-[#2A313A] hover:border-[#FF9900] transition">RELIANCE</button>
-          <button onclick="selectStock('TATAMOTORS.NS', 'Tata Motors Ltd.')" class="chip px-2.5 py-1 rounded bg-[#0B0E11] hover:bg-[#1E252E] text-slate-300 font-mono text-[11px] border border-[#2A313A] hover:border-[#FF9900] transition">TATAMOTORS</button>
+          <button onclick="selectStock('AAPL', 'Apple Inc.')" class="chip px-2.5 py-1 rounded bg-[#0B0E11] hover:bg-[#1E252E] text-slate-300 font-mono text-[11px] border border-[#2A313A] hover:border-[#FF9900] transition">AAPL</button>
+          <button onclick="selectStock('MSFT', 'Microsoft Corporation')" class="chip px-2.5 py-1 rounded bg-[#0B0E11] hover:bg-[#1E252E] text-slate-300 font-mono text-[11px] border border-[#2A313A] hover:border-[#FF9900] transition">MSFT</button>
           <button onclick="selectStock('NVDA', 'NVIDIA Corporation')" class="chip px-2.5 py-1 rounded bg-[#0B0E11] hover:bg-[#1E252E] text-slate-300 font-mono text-[11px] border border-[#2A313A] hover:border-[#FF9900] transition">NVDA</button>
+          <button onclick="selectStock('AMZN', 'Amazon.com Inc.')" class="chip px-2.5 py-1 rounded bg-[#0B0E11] hover:bg-[#1E252E] text-slate-300 font-mono text-[11px] border border-[#2A313A] hover:border-[#FF9900] transition">AMZN</button>
+          <button onclick="selectStock('GOOGL', 'Alphabet Inc.')" class="chip px-2.5 py-1 rounded bg-[#0B0E11] hover:bg-[#1E252E] text-slate-300 font-mono text-[11px] border border-[#2A313A] hover:border-[#FF9900] transition">GOOGL</button>
+          <button onclick="selectStock('AMD', 'Advanced Micro Devices')" class="chip px-2.5 py-1 rounded bg-[#0B0E11] hover:bg-[#1E252E] text-slate-300 font-mono text-[11px] border border-[#2A313A] hover:border-[#FF9900] transition">AMD</button>
         </div>
       </div>
 
@@ -482,15 +484,15 @@ Enter a stock ticker and click Analyze to generate the formal Investment Memo.
           </div>
           <div class="flex flex-wrap gap-1.5">
             <button onclick="loadBasket('ai')" class="px-2.5 py-1 rounded bg-[#15191E] hover:bg-[#1E252E] text-slate-200 border border-[#2A313A] hover:border-[#FF9900] transition flex items-center space-x-1 text-[11px] font-mono">
-              <span>🤖 Top AI & Tech</span>
+              <span>🤖 Mega-Cap Tech</span>
             </button>
-            <button onclick="loadBasket('india')" class="px-2.5 py-1 rounded bg-[#15191E] hover:bg-[#1E252E] text-slate-200 border border-[#2A313A] hover:border-[#FF9900] transition flex items-center space-x-1 text-[11px] font-mono">
-              <span>🇮🇳 India Bluechips</span>
+            <button onclick="loadBasket('finance')" class="px-2.5 py-1 rounded bg-[#15191E] hover:bg-[#1E252E] text-slate-200 border border-[#2A313A] hover:border-[#FF9900] transition flex items-center space-x-1 text-[11px] font-mono">
+              <span>🏦 US Banking & Finance</span>
             </button>
-            <button onclick="loadBasket('mobility')" class="px-2.5 py-1 rounded bg-[#15191E] hover:bg-[#1E252E] text-slate-200 border border-[#2A313A] hover:border-[#FF9900] transition flex items-center space-x-1 text-[11px] font-mono">
-              <span>⚡ EV & Future Tech</span>
+            <button onclick="loadBasket('consumer')" class="px-2.5 py-1 rounded bg-[#15191E] hover:bg-[#1E252E] text-slate-200 border border-[#2A313A] hover:border-[#FF9900] transition flex items-center space-x-1 text-[11px] font-mono">
+              <span>🛒 Consumer & Retail</span>
             </button>
-            <button onclick="loadBasket('balanced')" class="px-2.5 py-1 rounded bg-[#15191E] hover:bg-[#1E252E] text-slate-200 border border-[#2A313A] hover:border-[#FF9900] transition flex items-center space-x-1 text-[11px] font-mono">
+            <button onclick="loadBasket('defensive')" class="px-2.5 py-1 rounded bg-[#15191E] hover:bg-[#1E252E] text-slate-200 border border-[#2A313A] hover:border-[#FF9900] transition flex items-center space-x-1 text-[11px] font-mono">
               <span>🛡️ Low Vol Dividend</span>
             </button>
           </div>
@@ -677,55 +679,44 @@ Enter a stock ticker and click Analyze to generate the formal Investment Memo.
       if (tabId === 'portfolio' && !pieChart) optimizePortfolio();
     }
 
-    // Extensive Stock Catalog for Fast Real-Time Autocomplete Search
+    // Extensive S&P 500 Stock Catalog for Fast Real-Time Autocomplete Search
     const STOCK_CATALOG = [
-      // HDFC Group
-      { ticker: 'HDFCBANK.NS', name: 'HDFC Bank Ltd.', sector: 'Banking & Financial Services', exchange: 'NSE', aliases: ['hdfc', 'bank'] },
-      { ticker: 'HDFCLIFE.NS', name: 'HDFC Life Insurance Co.', sector: 'Life Insurance', exchange: 'NSE', aliases: ['hdfc', 'insurance'] },
-      { ticker: 'HDFCAMC.NS', name: 'HDFC Asset Management Co.', sector: 'Mutual Funds & AMC', exchange: 'NSE', aliases: ['hdfc', 'mutual fund'] },
+      // Mega-Cap Tech Leaders
+      { ticker: 'AAPL', name: 'Apple Inc.', sector: 'Consumer Electronics & Services', exchange: 'NASDAQ', aliases: ['apple', 'iphone', 'mac'] },
+      { ticker: 'MSFT', name: 'Microsoft Corporation', sector: 'Cloud, Enterprise & AI', exchange: 'NASDAQ', aliases: ['microsoft', 'windows', 'azure'] },
+      { ticker: 'NVDA', name: 'NVIDIA Corporation', sector: 'AI Compute & GPUs', exchange: 'NASDAQ', aliases: ['nvidia', 'gpu', 'chips', 'ai'] },
+      { ticker: 'AMZN', name: 'Amazon.com Inc.', sector: 'E-Commerce & AWS Cloud', exchange: 'NASDAQ', aliases: ['amazon', 'aws', 'cloud'] },
+      { ticker: 'GOOGL', name: 'Alphabet Inc. (Google)', sector: 'Search Engine & AI', exchange: 'NASDAQ', aliases: ['google', 'alphabet', 'youtube'] },
+      { ticker: 'FB', name: 'Meta Platforms (Facebook)', sector: 'Social Media & VR', exchange: 'NASDAQ', aliases: ['meta', 'facebook', 'instagram'] },
+      { ticker: 'META', name: 'Meta Platforms (FB)', sector: 'Social Platforms', exchange: 'NASDAQ', aliases: ['meta', 'facebook'] },
+      
+      // Semiconductors & Hardware
+      { ticker: 'AMD', name: 'Advanced Micro Devices', sector: 'CPUs, GPUs & Server', exchange: 'NASDAQ', aliases: ['amd', 'ryzen', 'epyc'] },
+      { ticker: 'INTC', name: 'Intel Corporation', sector: 'Semiconductors & Foundry', exchange: 'NASDAQ', aliases: ['intel', 'cpu'] },
+      { ticker: 'CSCO', name: 'Cisco Systems', sector: 'Networking Hardware', exchange: 'NASDAQ', aliases: ['cisco', 'networks'] },
+      
+      // Entertainment & Media
+      { ticker: 'NFLX', name: 'Netflix Inc.', sector: 'Streaming Media', exchange: 'NASDAQ', aliases: ['netflix', 'streaming', 'movies'] },
+      { ticker: 'DIS', name: 'The Walt Disney Company', sector: 'Entertainment & Theme Parks', exchange: 'NYSE', aliases: ['disney', 'marvel', 'parks'] },
+      
+      // Banking & Financial Leaders
+      { ticker: 'JPM', name: 'JPMorgan Chase & Co.', sector: 'Investment & Commercial Banking', exchange: 'NYSE', aliases: ['jpmorgan', 'chase', 'bank'] },
+      { ticker: 'BAC', name: 'Bank of America', sector: 'Retail & Commercial Banking', exchange: 'NYSE', aliases: ['bofa', 'bank of america'] },
+      { ticker: 'GS', name: 'Goldman Sachs Group', sector: 'Investment Banking', exchange: 'NYSE', aliases: ['goldman', 'sachs'] },
+      { ticker: 'V', name: 'Visa Inc.', sector: 'Digital Payments Network', exchange: 'NYSE', aliases: ['visa', 'credit card'] },
+      { ticker: 'MA', name: 'Mastercard Incorporated', sector: 'Payment Processing', exchange: 'NYSE', aliases: ['mastercard', 'payments'] },
 
-      // Reliance Group
-      { ticker: 'RELIANCE.NS', name: 'Reliance Industries Ltd.', sector: 'Energy, Retail & Jio 5G', exchange: 'NSE', aliases: ['reliance', 'jio', 'mukesh ambani'] },
-      { ticker: 'RPOWER.NS', name: 'Reliance Power Ltd.', sector: 'Power Generation & Utilities', exchange: 'NSE', aliases: ['reliance', 'power'] },
-      { ticker: 'RELINFRA.NS', name: 'Reliance Infrastructure Ltd.', sector: 'Engineering & Metro Infra', exchange: 'NSE', aliases: ['reliance', 'infra'] },
+      // Consumer Staples & Retail
+      { ticker: 'WMT', name: 'Walmart Inc.', sector: 'Hypermarkets & Grocery Retail', exchange: 'NYSE', aliases: ['walmart', 'retail'] },
+      { ticker: 'COST', name: 'Costco Wholesale', sector: 'Wholesale Retail', exchange: 'NASDAQ', aliases: ['costco'] },
+      { ticker: 'KO', name: 'The Coca-Cola Company', sector: 'Beverages & Soft Drinks', exchange: 'NYSE', aliases: ['coca cola', 'coke'] },
+      { ticker: 'PEP', name: 'PepsiCo Inc.', sector: 'Food, Snack & Beverages', exchange: 'NASDAQ', aliases: ['pepsi', 'fritolay'] },
 
-      // Tata Group
-      { ticker: 'TCS.NS', name: 'Tata Consultancy Services', sector: 'IT Services & AI Solutions', exchange: 'NSE', aliases: ['tata', 'tcs', 'software'] },
-      { ticker: 'TATAMOTORS.NS', name: 'Tata Motors Ltd.', sector: 'Automotive & EVs', exchange: 'NSE', aliases: ['tata', 'motors', 'cars', 'ev'] },
-      { ticker: 'TATASTEEL.NS', name: 'Tata Steel Ltd.', sector: 'Metals & Mining', exchange: 'NSE', aliases: ['tata', 'steel'] },
-      { ticker: 'TATAPOWER.NS', name: 'Tata Power Company Ltd.', sector: 'Renewable & Solar Energy', exchange: 'NSE', aliases: ['tata', 'power', 'solar'] },
-      { ticker: 'TITAN.NS', name: 'Titan Company Ltd.', sector: 'Jewelry & Watches (Tata)', exchange: 'NSE', aliases: ['tata', 'titan', 'tanishq'] },
-
-      // Adani Group
-      { ticker: 'ADANIENT.NS', name: 'Adani Enterprises Ltd.', sector: 'Commodities & Airports', exchange: 'NSE', aliases: ['adani', 'enterprises'] },
-      { ticker: 'ADANIPORTS.NS', name: 'Adani Ports & SEZ', sector: 'Ports & Marine Logistics', exchange: 'NSE', aliases: ['adani', 'ports'] },
-      { ticker: 'ATGL.NS', name: 'Adani Total Gas Ltd.', sector: 'City Gas Distribution', exchange: 'NSE', aliases: ['adani', 'gas'] },
-
-      // Other Indian Bluechips
-      { ticker: 'SBIN.NS', name: 'State Bank of India (SBI)', sector: 'Public Sector Banking', exchange: 'NSE', aliases: ['sbi', 'state bank'] },
-      { ticker: 'ICICIBANK.NS', name: 'ICICI Bank Ltd.', sector: 'Private Banking', exchange: 'NSE', aliases: ['icici', 'bank'] },
-      { ticker: 'KOTAKBANK.NS', name: 'Kotak Mahindra Bank', sector: 'Private Banking', exchange: 'NSE', aliases: ['kotak', 'bank'] },
-      { ticker: 'AXISBANK.NS', name: 'Axis Bank Ltd.', sector: 'Private Banking', exchange: 'NSE', aliases: ['axis', 'bank'] },
-      { ticker: 'BAJFINANCE.NS', name: 'Bajaj Finance Ltd.', sector: 'Consumer Lending & NBFC', exchange: 'NSE', aliases: ['bajaj', 'finance'] },
-      { ticker: 'INFY.NS', name: 'Infosys Ltd.', sector: 'IT Consulting & Cloud', exchange: 'NSE', aliases: ['infosys', 'infy', 'it'] },
-      { ticker: 'WIPRO.NS', name: 'Wipro Ltd.', sector: 'IT Services', exchange: 'NSE', aliases: ['wipro'] },
-      { ticker: 'HCLTECH.NS', name: 'HCL Technologies Ltd.', sector: 'IT Services', exchange: 'NSE', aliases: ['hcl'] },
-      { ticker: 'ITC.NS', name: 'ITC Limited', sector: 'FMCG, Cigarettes & Hotels', exchange: 'NSE', aliases: ['itc'] },
-      { ticker: 'BHARTIARTL.NS', name: 'Bharti Airtel Ltd.', sector: 'Telecom & 5G', exchange: 'NSE', aliases: ['airtel', 'bharti'] },
-      { ticker: 'MARUTI.NS', name: 'Maruti Suzuki India Ltd.', sector: 'Automobiles', exchange: 'NSE', aliases: ['maruti', 'suzuki'] },
-      { ticker: 'SUNPHARMA.NS', name: 'Sun Pharmaceutical Ltd.', sector: 'Pharma & Healthcare', exchange: 'NSE', aliases: ['sun pharma', 'medicine'] },
-
-      // US Tech & Global Giants
-      { ticker: 'AAPL', name: 'Apple Inc.', sector: 'Consumer Tech & iPhone', exchange: 'NASDAQ', aliases: ['apple', 'iphone', 'mac'] },
-      { ticker: 'NVDA', name: 'NVIDIA Corporation', sector: 'AI GPUs & Chips', exchange: 'NASDAQ', aliases: ['nvidia', 'chips', 'gpu', 'ai'] },
-      { ticker: 'TSLA', name: 'Tesla Inc.', sector: 'Electric Vehicles & Clean Energy', exchange: 'NASDAQ', aliases: ['tesla', 'elon musk', 'ev'] },
-      { ticker: 'MSFT', name: 'Microsoft Corporation', sector: 'Cloud, Windows & Copilot', exchange: 'NASDAQ', aliases: ['microsoft', 'windows', 'azure'] },
-      { ticker: 'AMZN', name: 'Amazon.com Inc.', sector: 'E-Commerce & AWS Cloud', exchange: 'NASDAQ', aliases: ['amazon', 'aws'] },
-      { ticker: 'GOOGL', name: 'Alphabet Inc. (Google)', sector: 'Search & Cloud AI', exchange: 'NASDAQ', aliases: ['google', 'alphabet', 'youtube'] },
-      { ticker: 'META', name: 'Meta Platforms Inc.', sector: 'Social Media (Facebook/Instagram)', exchange: 'NASDAQ', aliases: ['meta', 'facebook', 'instagram'] },
-      { ticker: 'NFLX', name: 'Netflix Inc.', sector: 'Streaming Entertainment', exchange: 'NASDAQ', aliases: ['netflix', 'movies'] },
-      { ticker: 'AMD', name: 'Advanced Micro Devices', sector: 'Semiconductors & CPUs', exchange: 'NASDAQ', aliases: ['amd', 'ryzen'] },
-      { ticker: 'INTC', name: 'Intel Corporation', sector: 'Semiconductors', exchange: 'NASDAQ', aliases: ['intel'] }
+      // Energy, Aerospace & Industrials
+      { ticker: 'XOM', name: 'Exxon Mobil Corporation', sector: 'Integrated Oil & Gas', exchange: 'NYSE', aliases: ['exxon', 'oil'] },
+      { ticker: 'CVX', name: 'Chevron Corporation', sector: 'Energy & Petrochemicals', exchange: 'NYSE', aliases: ['chevron', 'gas'] },
+      { ticker: 'BA', name: 'The Boeing Company', sector: 'Aerospace & Commercial Jets', exchange: 'NYSE', aliases: ['boeing', 'airplane'] },
+      { ticker: 'CAT', name: 'Caterpillar Inc.', sector: 'Heavy Machinery & Mining', exchange: 'NYSE', aliases: ['caterpillar', 'construction'] }
     ];
 
     const COMPANY_MAP = {};
@@ -833,12 +824,12 @@ Enter a stock ticker and click Analyze to generate the formal Investment Memo.
       const input = document.getElementById('portTickers');
       if (type === 'ai') {
         input.value = 'NVDA, MSFT, AAPL, GOOGL';
-      } else if (type === 'india') {
-        input.value = 'RELIANCE.NS, TCS.NS, HDFCBANK.NS, INFY.NS';
-      } else if (type === 'mobility') {
-        input.value = 'TSLA, NVDA, AAPL, AMZN';
-      } else if (type === 'balanced') {
-        input.value = 'MSFT, AAPL, HDFCBANK.NS, AMZN';
+      } else if (type === 'finance') {
+        input.value = 'JPM, BAC, GS, V';
+      } else if (type === 'consumer') {
+        input.value = 'AMZN, WMT, COST, KO';
+      } else if (type === 'defensive') {
+        input.value = 'JNJ, PFE, KO, PEP';
       }
       optimizePortfolio();
     }

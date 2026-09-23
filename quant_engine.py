@@ -30,7 +30,7 @@ class QuantEngine:
 
     def analyze_stock(self, ticker: str = "AAPL", risk_tolerance: str = "Moderate"):
         ticker = ticker.strip().upper()
-        df = get_stock_data(ticker, period="1y")
+        df = get_stock_data(ticker)
 
         if len(df) < 2:
             raise ValueError(f"Insufficient data returned for {ticker}")
@@ -248,7 +248,7 @@ class QuantEngine:
         returns_dict = {}
         for t in clean_tickers:
             try:
-                df = get_stock_data(t, period="1y")
+                df = get_stock_data(t)
                 s = df["Close"].pct_change().dropna()
                 s.index = pd.to_datetime(s.index).normalize()
                 returns_dict[t] = s
@@ -318,22 +318,22 @@ class QuantEngine:
             {"ticker": "AAPL", "name": "Apple Inc.", "category": "US Tech / Consumer"},
             {"ticker": "MSFT", "name": "Microsoft Corporation", "category": "US Tech / Cloud"},
             {"ticker": "GOOGL", "name": "Alphabet Inc. (Google)", "category": "US Tech / Search"},
-            {"ticker": "AMZN", "name": "Amazon.com Inc.", "category": "US E-Commerce"},
-            {"ticker": "TSLA", "name": "Tesla Inc.", "category": "US Auto / Clean Energy"},
-            {"ticker": "META", "name": "Meta Platforms", "category": "US Social Media & AI"},
+            {"ticker": "AMZN", "name": "Amazon.com Inc.", "category": "US E-Commerce & AWS"},
+            {"ticker": "FB", "name": "Meta Platforms", "category": "US Social Media & AI"},
             {"ticker": "AMD", "name": "Advanced Micro Devices", "category": "US Semiconductors"},
-            {"ticker": "RELIANCE.NS", "name": "Reliance Industries", "category": "India Energy & Jio"},
-            {"ticker": "TCS.NS", "name": "Tata Consultancy (TCS)", "category": "India IT Leader"},
-            {"ticker": "HDFCBANK.NS", "name": "HDFC Bank Ltd.", "category": "India Banking"},
-            {"ticker": "ICICIBANK.NS", "name": "ICICI Bank Ltd.", "category": "India Banking"},
-            {"ticker": "SBIN.NS", "name": "State Bank of India", "category": "India PSU Banking"},
-            {"ticker": "INFY.NS", "name": "Infosys Ltd.", "category": "India IT Services"},
-            {"ticker": "BHARTIARTL.NS", "name": "Bharti Airtel Ltd.", "category": "India Telecom & 5G"},
-            {"ticker": "ITC.NS", "name": "ITC Limited", "category": "India FMCG Leader"},
-            {"ticker": "TATAMOTORS.NS", "name": "Tata Motors Ltd.", "category": "India Auto & EVs"},
-            {"ticker": "TITAN.NS", "name": "Titan Company Ltd.", "category": "India Tata Lifestyle"},
-            {"ticker": "BAJFINANCE.NS", "name": "Bajaj Finance Ltd.", "category": "India NBFC / FinTech"},
-            {"ticker": "SUNPHARMA.NS", "name": "Sun Pharma Ltd.", "category": "India Healthcare"}
+            {"ticker": "JPM", "name": "JPMorgan Chase & Co.", "category": "US Banking Leader"},
+            {"ticker": "BAC", "name": "Bank of America", "category": "US Financial Services"},
+            {"ticker": "DIS", "name": "The Walt Disney Company", "category": "US Media & Entertainment"},
+            {"ticker": "NFLX", "name": "Netflix Inc.", "category": "US Streaming Media"},
+            {"ticker": "INTC", "name": "Intel Corporation", "category": "US Semiconductors"},
+            {"ticker": "V", "name": "Visa Inc.", "category": "US Digital Payments"},
+            {"ticker": "MA", "name": "Mastercard Inc.", "category": "US Payment Systems"},
+            {"ticker": "WMT", "name": "Walmart Inc.", "category": "US Retail Leader"},
+            {"ticker": "KO", "name": "The Coca-Cola Company", "category": "US Consumer Staples"},
+            {"ticker": "PEP", "name": "PepsiCo Inc.", "category": "US Consumer Goods"},
+            {"ticker": "XOM", "name": "Exxon Mobil Corp.", "category": "US Energy Leader"},
+            {"ticker": "CVX", "name": "Chevron Corporation", "category": "US Energy"},
+            {"ticker": "BA", "name": "The Boeing Company", "category": "US Aerospace & Defense"}
         ]
         watchlist = []
 
@@ -342,7 +342,7 @@ class QuantEngine:
             name = item["name"]
             cat = item["category"]
             try:
-                df = get_stock_data(t, period="3mo")
+                df = get_stock_data(t)
                 last = df.iloc[-1]
                 prev = df.iloc[-2]
                 price = float(last["Close"])
@@ -368,9 +368,9 @@ class QuantEngine:
         return watchlist
 
     def run_backtest(self, ticker="AAPL", initial_capital=1000.0):
-        df = get_stock_data(ticker, period="1y")
-        if len(df) < 50:
-            df = get_stock_data("AAPL", period="1y")
+        df = get_stock_data(ticker)
+        if len(df) > 252:
+            df = df.iloc[-252:]  # 1 standard trading year (252 days)
 
         close = df["Close"].values
         sma20 = df["SMA_20"].values

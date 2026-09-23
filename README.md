@@ -11,7 +11,7 @@ An end-to-end quantitative financial analytics platform combining **Random Fores
 | **Live Web Terminal (HTTPS)** | **[https://investor-councils-norman-vary.trycloudflare.com](https://investor-councils-norman-vary.trycloudflare.com)** | Secure SSL production link |
 | **AWS EC2 Public Domain** | **[http://ec2-100-48-83-175.compute-1.amazonaws.com](http://ec2-100-48-83-175.compute-1.amazonaws.com)** | Official Amazon AWS instance link |
 | **AWS API Gateway** | `https://kfc073dfuj.execute-api.us-east-1.amazonaws.com` | Serverless ML inference API |
-| **Amazon S3 Data Lake** | `s3://aeroquant-market-data-992483130712/` | 23 historical OHLCV datasets & model artifacts |
+| **Amazon S3 Data Lake** | `s3://aeroquant-market-data-992483130712/` | Kaggle S&P 500 Unified Dataset (`all_stocks_5yr.csv`) |
 
 ---
 
@@ -20,7 +20,7 @@ An end-to-end quantitative financial analytics platform combining **Random Fores
 ```mermaid
 flowchart TD
     subgraph Data & Pipeline
-        A[Yahoo Finance / yfinance API] -->|Historical Daily OHLCV| B[Technical Indicator Pipeline]
+        A[Kaggle S&P 500 Master Dataset] -->|Daily OHLCV - 505 Companies| B[Technical Indicator Pipeline]
         B -->|RSI, MACD, SMA, Volatility| C[Feature Matrix]
         C -->|Staged to| D[Amazon S3 Data Lake]
     end
@@ -32,7 +32,7 @@ flowchart TD
     end
 
     subgraph Client Application
-        H[AeroQuant Web Terminal] -->|REST API| I[Flask API / AWS Lambda]
+        H[AeroQuant Web Terminal] -->|REST API| I[FastAPI / AWS Lambda]
         I -->|Inference| G
         I -->|Quantitative Engine| J[Portfolio Optimizer & Risk Guard]
     end
@@ -78,17 +78,21 @@ Open your browser and navigate to: **`http://localhost:5000`**
 
 ## 📁 Repository Structure
 ```text
-├── data/                       # Cached market datasets for offline execution
-├── models/                     # Trained Random Forest model and evaluation metrics
+├── data/
+│   └── all_stocks_5yr.csv       # Kaggle S&P 500 unified master dataset (505 companies, 619,040 rows)
+├── models/
+│   ├── stock_rf_model.joblib    # Trained Random Forest model (100 Trees)
+│   └── metrics.json             # Accuracy (55.4%), Precision (58.1%), F1 (58.4%)
 ├── frontend/
 │   └── index.html              # Modern dark financial terminal (Tailwind CSS, Chart.js)
-├── data_loader.py              # Yahoo Finance data pipeline & technical indicator calculator
-├── train_model.py              # Random Forest training and evaluation script
-├── quant_engine.py             # Risk levels, portfolio optimizer, backtester & memo generator
-├── train_sagemaker.py          # AWS SageMaker Scikit-learn Estimator script
-├── lambda_function.py          # AWS Lambda inference handler script
-├── server.py                   # Flask API server
-├── requirements.txt            # Python dependencies
-├── README.md                   # Project documentation
-└── VIVA_GUIDE.md               # Teacher Viva Questions & Answers
+├── code/
+│   ├── data_loader.py           # S&P 500 master dataset pipeline & technical indicators
+│   ├── train_model.py           # Random Forest training and evaluation script
+│   ├── quant_engine.py          # Risk levels, Sharpe portfolio optimizer & backtester
+│   ├── server.py                # FastAPI server (Interactive Swagger docs at /docs)
+│   ├── lambda_function.py       # AWS Lambda inference handler script
+│   └── train_sagemaker.py       # AWS SageMaker & Amazon S3 data lake staging
+├── requirements.txt             # Python dependencies (FastAPI, Uvicorn, Scikit-Learn)
+├── README.md                    # Project documentation
+└── VIVA_GUIDE.md                # Teacher Viva Questions & Answers
 ```

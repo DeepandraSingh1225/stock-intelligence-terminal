@@ -1,14 +1,14 @@
 {
   "model_type": "Random Forest Classifier (100 Trees)",
-  "accuracy": 0.4943,
-  "precision": 0.4566,
-  "recall": 0.5015,
-  "f1_score": 0.478,
+  "accuracy": 0.5536,
+  "precision": 0.5809,
+  "recall": 0.5878,
+  "f1_score": 0.5843,
   "feature_importances": {
-    "Volatility": 0.263,
-    "SMA_Ratio": 0.2385,
-    "MACD_Hist": 0.2203,
-    "RSI": 0.1784,
-    "Daily_Return": 0.0998
+    "Volatility": 0.2753,
+    "SMA_Ratio": 0.237,
+    "RSI": 0.1993,
+    "MACD_Hist": 0.1637,
+    "Daily_Return": 0.1247
   }
 }

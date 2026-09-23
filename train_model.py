@@ -19,25 +19,26 @@ os.makedirs(MODELS_DIR, exist_ok=True)
 
 FEATURE_COLS = ["RSI", "SMA_Ratio", "MACD_Hist", "Volatility", "Daily_Return"]
 
-def train_stock_model(tickers=["AAPL", "MSFT", "GOOGL", "NVDA", "TSLA"]):
+def train_stock_model(tickers=["AAPL", "MSFT", "GOOGL", "NVDA", "AMZN"]):
     print("==================================================")
     print("TRAINING RANDOM FOREST TREND PREDICTOR")
+    print("Dataset: Kaggle S&P 500 (all_stocks_5yr.csv)")
     print("==================================================")
 
     frames = []
     for t in tickers:
         try:
-            df = get_stock_data(t, period="3y")
+            df = get_stock_data(t)
             frames.append(df)
         except Exception as e:
             print(f"Skipping {t}: {e}")
 
     if not frames:
-        df_aapl = get_stock_data("AAPL", period="3y")
+        df_aapl = get_stock_data("AAPL")
         frames = [df_aapl]
 
     combined_df = pd.concat(frames)
-    print(f"Total dataset size: {len(combined_df)} historical trading rows across {len(frames)} tickers.")
+    print(f"Total training rows: {len(combined_df)} historical trading days across {len(frames)} leaders.")
 
     X = combined_df[FEATURE_COLS]
     y = combined_df["Target"]
