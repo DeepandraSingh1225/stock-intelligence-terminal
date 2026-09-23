@@ -45,10 +45,17 @@ class BacktestRequest(BaseModel):
     ticker: Optional[str] = "AAPL"
     capital: Optional[float] = 1000.0
 
+INDEX_HTML_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "frontend", "index.html")
+
 @app.get("/")
 def index():
     """Serves the main quantitative financial terminal UI."""
-    return FileResponse("frontend/index.html")
+    return FileResponse(INDEX_HTML_PATH)
+
+@app.get("/api/health")
+def health_endpoint():
+    """Health check endpoint for AWS EC2 and monitoring."""
+    return {"status": "ok", "framework": "FastAPI", "version": "2.0.0"}
 
 @app.post("/api/analyze")
 def analyze_endpoint(req: AnalyzeRequest):

@@ -60,6 +60,11 @@ def index():
     """Serves the main quantitative financial terminal UI."""
     return FileResponse(INDEX_HTML_PATH)
 
+@app.get("/api/health")
+def health_endpoint():
+    """Health check endpoint for AWS EC2 and monitoring."""
+    return {"status": "ok", "framework": "FastAPI", "version": "2.0.0"}
+
 @app.post("/api/analyze")
 def analyze_endpoint(req: AnalyzeRequest):
     """Generates AI signal, technical scorecard, and 1:2 risk-reward levels for a stock."""
