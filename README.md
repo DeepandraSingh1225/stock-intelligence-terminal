@@ -8,8 +8,9 @@ An end-to-end quantitative financial analytics platform combining **Random Fores
 
 | Resource | URL / Access | Description |
 | :--- | :--- | :--- |
-| **Live Web Terminal (HTTPS)** | **[https://investor-councils-norman-vary.trycloudflare.com](https://investor-councils-norman-vary.trycloudflare.com)** | Secure SSL production link |
-| **AWS EC2 Public Domain** | **[http://ec2-100-48-83-175.compute-1.amazonaws.com](http://ec2-100-48-83-175.compute-1.amazonaws.com)** | Official Amazon AWS instance link |
+| **Live Web Terminal** | **[http://ec2-100-48-83-175.compute-1.amazonaws.com](http://ec2-100-48-83-175.compute-1.amazonaws.com)** | Production terminal UI via Nginx reverse proxy (Port 80) |
+| **FastAPI Swagger Docs** | **[http://ec2-100-48-83-175.compute-1.amazonaws.com/docs](http://ec2-100-48-83-175.compute-1.amazonaws.com/docs)** | Interactive OpenAPI testing & documentation |
+| **Branded Domain** | **[http://aeroquant.100.48.83.175.nip.io](http://aeroquant.100.48.83.175.nip.io)** | Custom branded terminal domain |
 | **AWS API Gateway** | `https://kfc073dfuj.execute-api.us-east-1.amazonaws.com` | Serverless ML inference API |
 | **Amazon S3 Data Lake** | `s3://aeroquant-market-data-992483130712/` | Kaggle S&P 500 Unified Dataset (`all_stocks_5yr.csv`) |
 
